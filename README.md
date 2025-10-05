@@ -31,7 +31,7 @@ npx supabase start
 
 Lệnh trên sẽ:
 - Khởi chạy Postgres, Studio, API Gateway.  
-- Sinh ra thông tin kết nối (`anon key`, `service key`) trong `.env` để app Android sử dụng.
+- Sinh ra thông tin kết nối (`anon key`, `service key`) để app Android sử dụng.
 
 ---
 
