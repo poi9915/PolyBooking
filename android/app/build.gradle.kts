@@ -46,7 +46,7 @@ android {
 }
 kotlin{
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_1_8)
+        jvmTarget.set(JvmTarget.JVM_11)
     }
 }
 dependencies {
@@ -64,7 +64,12 @@ dependencies {
 //    Coroutines + Flow
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
-//
+//    Google ID
+    implementation("androidx.credentials:credentials:1.6.0-alpha05")
+    implementation("androidx.credentials:credentials-play-services-auth:1.6.0-alpha05")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+//    Material ICON
+    implementation("androidx.compose.material:material-icons-extended:1.6.7")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

@@ -8,7 +8,7 @@ import io.github.jan.supabase.realtime.Realtime
 import io.github.jan.supabase.storage.Storage
 
 object SupabaseClient {
-    private val supabase = createSupabaseClient(
+     val client = createSupabaseClient(
         supabaseUrl = Supabase.SUPABASE_URL.value,
         supabaseKey = Supabase.SUPABASE_PUBLIC_KEY.value
     ) {
