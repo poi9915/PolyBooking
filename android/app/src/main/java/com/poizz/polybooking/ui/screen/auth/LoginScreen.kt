@@ -42,6 +42,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.poizz.polybooking.R
+import com.poizz.polybooking.ui.theme.PolyBookingPreviewTheme
 import com.poizz.polybooking.ui.theme.PolyBookingTheme
 
 
@@ -61,6 +62,8 @@ fun LoginScreen(
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxSize()
         ) {
+
+            Text(text = "Đăng nhập" , color = MaterialTheme.colorScheme.primary)
             OutlinedTextField(
                 leadingIcon = {
                     Icon(
@@ -173,7 +176,7 @@ fun LoginScreen(
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
-    PolyBookingTheme {
+    PolyBookingPreviewTheme {
         LoginScreen()
     }
 }

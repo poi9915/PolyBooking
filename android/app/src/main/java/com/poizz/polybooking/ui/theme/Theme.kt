@@ -1,4 +1,5 @@
 package com.poizz.polybooking.ui.theme
+
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -245,57 +246,57 @@ private val highContrastDarkColorScheme = darkColorScheme(
 )
 
 val extendedLight = ExtendedColorScheme(
-  customColor1 = ColorFamily(
-      customColor1Light,
-      onCustomColor1Light,
-      customColor1ContainerLight,
-      onCustomColor1ContainerLight,
-  ),
+    customColor1 = ColorFamily(
+        customColor1Light,
+        onCustomColor1Light,
+        customColor1ContainerLight,
+        onCustomColor1ContainerLight,
+    ),
 )
 
 val extendedDark = ExtendedColorScheme(
-  customColor1 = ColorFamily(
-      customColor1Dark,
-      onCustomColor1Dark,
-      customColor1ContainerDark,
-      onCustomColor1ContainerDark,
-  ),
+    customColor1 = ColorFamily(
+        customColor1Dark,
+        onCustomColor1Dark,
+        customColor1ContainerDark,
+        onCustomColor1ContainerDark,
+    ),
 )
 
 val extendedLightMediumContrast = ExtendedColorScheme(
-  customColor1 = ColorFamily(
-      customColor1LightMediumContrast,
-      onCustomColor1LightMediumContrast,
-      customColor1ContainerLightMediumContrast,
-      onCustomColor1ContainerLightMediumContrast,
-  ),
+    customColor1 = ColorFamily(
+        customColor1LightMediumContrast,
+        onCustomColor1LightMediumContrast,
+        customColor1ContainerLightMediumContrast,
+        onCustomColor1ContainerLightMediumContrast,
+    ),
 )
 
 val extendedLightHighContrast = ExtendedColorScheme(
-  customColor1 = ColorFamily(
-      customColor1LightHighContrast,
-      onCustomColor1LightHighContrast,
-      customColor1ContainerLightHighContrast,
-      onCustomColor1ContainerLightHighContrast,
-  ),
+    customColor1 = ColorFamily(
+        customColor1LightHighContrast,
+        onCustomColor1LightHighContrast,
+        customColor1ContainerLightHighContrast,
+        onCustomColor1ContainerLightHighContrast,
+    ),
 )
 
 val extendedDarkMediumContrast = ExtendedColorScheme(
-  customColor1 = ColorFamily(
-      customColor1DarkMediumContrast,
-      onCustomColor1DarkMediumContrast,
-      customColor1ContainerDarkMediumContrast,
-      onCustomColor1ContainerDarkMediumContrast,
-  ),
+    customColor1 = ColorFamily(
+        customColor1DarkMediumContrast,
+        onCustomColor1DarkMediumContrast,
+        customColor1ContainerDarkMediumContrast,
+        onCustomColor1ContainerDarkMediumContrast,
+    ),
 )
 
 val extendedDarkHighContrast = ExtendedColorScheme(
-  customColor1 = ColorFamily(
-      customColor1DarkHighContrast,
-      onCustomColor1DarkHighContrast,
-      customColor1ContainerDarkHighContrast,
-      onCustomColor1ContainerDarkHighContrast,
-  ),
+    customColor1 = ColorFamily(
+        customColor1DarkHighContrast,
+        onCustomColor1DarkHighContrast,
+        customColor1ContainerDarkHighContrast,
+        onCustomColor1ContainerDarkHighContrast,
+    ),
 )
 
 @Immutable
@@ -303,7 +304,7 @@ data class ColorFamily(
     val color: Color,
     val onColor: Color,
     val colorContainer: Color,
-    val onColorContainer: Color
+    val onColorContainer: Color,
 )
 
 val unspecified_scheme = ColorFamily(
@@ -312,25 +313,38 @@ val unspecified_scheme = ColorFamily(
 
 @Composable
 fun PolyBookingTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+//    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = false,
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
-    content: @Composable() () -> Unit
+    dynamicColor: Boolean = false,
+    content: @Composable() () -> Unit,
 ) {
-  val colorScheme = when {
-      dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-          val context = LocalContext.current
-          if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-      }
-      
-      darkTheme -> darkScheme
-      else -> lightScheme
-  }
+    val colorScheme = when {
+        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+            val context = LocalContext.current
+            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        }
 
-  MaterialTheme(
-    colorScheme = colorScheme,
-    typography = AppTypography,
-    content = content
-  )
+        darkTheme -> darkScheme
+        else -> lightScheme
+    }
+
+    MaterialTheme(
+        colorScheme = colorScheme,
+        typography = AppTypography,
+        content = content
+    )
 }
 
+@Composable
+fun PolyBookingPreviewTheme(
+    darkTheme: Boolean = false,
+    content: @Composable () -> Unit
+) {
+    val colorScheme = if (darkTheme) darkScheme else lightScheme
+    MaterialTheme(
+        colorScheme = colorScheme,
+        typography = AppTypography,
+        content = content
+    )
+}
