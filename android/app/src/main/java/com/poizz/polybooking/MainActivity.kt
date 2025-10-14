@@ -4,6 +4,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import com.poizz.polybooking.ui.screen.MainApp
 import com.poizz.polybooking.ui.theme.PolyBookingTheme
 
@@ -18,8 +22,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-<<<<<<< Updated upstream
-=======
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
@@ -36,4 +38,4 @@ fun GreetingPreview() {
         Greeting("Android")
     }
 }
->>>>>>> Stashed changes
+

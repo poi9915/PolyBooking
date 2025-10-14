@@ -172,8 +172,7 @@ fun LoginScreen(
         }
     }
 }
-@Composable
-fun SignUPScreen(){}
+
 
 @Preview(showBackground = true)
 @Composable
