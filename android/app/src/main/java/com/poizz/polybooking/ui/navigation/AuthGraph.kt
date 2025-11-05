@@ -17,10 +17,29 @@ fun AuthGraph(
 ) {
     NavHost(navController = navController, startDestination = AuthDestinations.LOGIN) {
         composable(AuthDestinations.LOGIN) {
-            LoginScreen()
+            LoginScreen(
+                onLoginSuccess = {
+                    onLoginSuccess() // Gọi callback để đổi trạng thái
+                },
+                onSignUpClick = {
+                    navController.navigate(AuthDestinations.SIGNUP)
+                }
+            )
         }
+
         composable(AuthDestinations.SIGNUP) {
-            SignUpScreen()
+            SignUpScreen(
+                onSignUpSuccess = {
+                    navController.navigate(AuthDestinations.LOGIN){
+                        popUpTo(AuthDestinations.SIGNUP){
+                            inclusive = true
+                        }
+                    }
+                },
+                onBackToLogin = {
+                    navController.navigate(AuthDestinations.LOGIN)
+                }
+            )
         }
     }
 }

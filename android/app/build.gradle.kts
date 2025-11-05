@@ -77,7 +77,7 @@ dependencies {
 //    Material ICON
     implementation("androidx.compose.material:material-icons-extended:1.6.7")
     implementation("androidx.compose.material3:material3:1.3.0")
-
+    implementation("androidx.navigation:navigation-compose:2.8.3")
 
 
     implementation(libs.androidx.core.ktx)
@@ -90,6 +90,8 @@ dependencies {
     implementation(libs.androidx.material3)
 
     implementation(libs.material)
+
+
 
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

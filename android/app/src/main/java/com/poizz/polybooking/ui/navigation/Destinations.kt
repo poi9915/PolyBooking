@@ -11,5 +11,15 @@ object AuthDestinations {
 }
 
 object HomeDestination {
-    const val MAIN = "main"
+    const val HOME = "Home"
+    const val DAT_SAN = "dat_san"
+    const val GIAI_DAU = "giai_dau"
+    const val TRINH_DO = "trinh_do"
+    const val BXH = "bxh"
+    const val MENU = "menu"
+    const val ACCOUNT = "account"
+    const val SETTING = "setting"
+    const val UPDATE_ACCOUNT = "update_account"
+    const val LUAT_DAU = "luat_dau"
+
 }

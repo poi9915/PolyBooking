@@ -10,6 +10,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -33,8 +35,8 @@ import com.poizz.polybooking.ui.theme.PolyBookingTheme
 
 @Composable
 fun SignUpScreen(
-    onLoginClick: (() -> Unit)? = null,
-    onBackClick: (() -> Unit)? = null
+    onSignUpSuccess: () -> Unit = {},
+    onBackToLogin: () -> Unit = {}
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -82,18 +84,19 @@ fun SignUpScreen(
 
             // Tiêu đề "Sign Up"
             Text(
-                text = "Sign Up",
-                style = TextStyle(
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF4F8A10)
-                )
+                text = "ĐĂNG KÝ",
+                color = MaterialTheme.colorScheme.primary,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
             // Ô nhập Email
             OutlinedTextField(
+                leadingIcon = {
+                    Icon(Icons.Default.Email, contentDescription = "Email")
+                },
                 value = email,
                 onValueChange = { email = it },
                 label = { Text("Email") },
@@ -112,10 +115,13 @@ fun SignUpScreen(
 
             // Ô nhập Password
             OutlinedTextField(
+                leadingIcon = {
+                    Icon(Icons.Default.Lock, contentDescription = "Password")
+                },
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("Password") },
-                placeholder = { Text("Enter password") },
+                label = { Text("Mật khẩu") },
+                placeholder = { Text("Nhập mật khẩu") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 trailingIcon = {
@@ -140,10 +146,13 @@ fun SignUpScreen(
 
             // Ô nhập Confirm Password
             OutlinedTextField(
+                leadingIcon = {
+                    Icon(Icons.Default.Lock, contentDescription = "Password")
+                },
                 value = confirmPassword,
                 onValueChange = { confirmPassword = it },
-                label = { Text("Confirm password") },
-                placeholder = { Text("Enter password") },
+                label = { Text("Nhập lại mật khẩu") },
+                placeholder = { Text("Nhập lại mật khẩu") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 trailingIcon = {
@@ -166,22 +175,23 @@ fun SignUpScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Nút Sign Up
-            Button(
-                onClick = { /* TODO: Xử lý đăng ký */ },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8BC34A)),
-                shape = RoundedCornerShape(50),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp)
+            // Nút đăng ký
+            OutlinedButton(
+                onClick = {
+                    // Giả lập đăng nhập thành công
+                    if (email.isNotBlank() && password.isNotBlank()) {
+                        onSignUpSuccess()  // chuyển sang login
+                    } else {
+                        // bạn có thể thêm Toast hoặc Snackbar báo lỗi ở đây
+                    }
+                },
+                colors = ButtonDefaults.outlinedButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ),
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
-                    text = "Sign Up",
-                    style = TextStyle(
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                )
+                Text("Đăng ký")
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -193,25 +203,25 @@ fun SignUpScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "Already have an account? ",
+                    text = "Bạn đã có tài khoản ? ",
                     color = Color.Black,
-                    style = TextStyle(fontSize = 14.sp)
+                    style = TextStyle(fontSize = 16.sp)
                 )
                 Text(
-                    text = "Login",
+                    text = "Đăng nhập",
                     color = Color(0xFF4F8A10),
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.clickable { onLoginClick?.invoke() }
+                    modifier = Modifier.clickable { onBackToLogin?.invoke() }
                 )
             }
         }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewSignUp() {
-    PolyBookingTheme {
-        SignUpScreen()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewSignUp() {
+//    PolyBookingTheme {
+//        SignUpScreen()
+//    }
+//}

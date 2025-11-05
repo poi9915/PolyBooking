@@ -2,6 +2,7 @@ package com.poizz.polybooking.ui.screen.auth
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,7 +25,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Surface
@@ -37,15 +37,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.poizz.polybooking.ui.theme.PolyBookingTheme
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.poizz.polybooking.R
+import com.poizz.polybooking.ui.navigation.HomeDestination
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    navController: NavController
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -55,18 +58,21 @@ fun HomeScreen() {
         HeadearSection()
 
         // Tính năng Pickleball
-        FeatureSection()
+        FeatureSection(navController)
 
         // Tin tức & sự kiện
         NewsSection()
 
         Spacer(modifier = Modifier.weight(1f))
 
-        // Thanh menu cuối
-        BottomNavigationBar()
     }
 }
 
+//userName: String,
+//userId: String,
+//modifier: Modifier = Modifier,
+//backgroundRes: Int = R.drawable.header_bg, // có thể là ảnh nền
+//onNotificationClick: () -> Unit = {}
 @Composable
 fun HeadearSection() {
     Box(
@@ -208,7 +214,7 @@ fun UserInfoSection() {
 }
 
 @Composable
-fun FeatureSection() {
+fun FeatureSection(navController: NavController) {
     Column(
         modifier = Modifier
             .padding(12.dp)
@@ -227,19 +233,29 @@ fun FeatureSection() {
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxWidth()
         ) {
-            FeatureItem("Đặt sân", R.drawable.icon_san_pickleball)
-            FeatureItem("Giải đấu", R.drawable.icon_cup)
-            FeatureItem("Trình độ", R.drawable.icon_trinh_do)
-            FeatureItem("Luật", R.drawable.img)
+            FeatureItem("Đặt sân", R.drawable.icon_san_pickleball){
+                navController.navigate(HomeDestination.DAT_SAN)
+            }
+            FeatureItem("Giải đấu", R.drawable.icon_cup){
+                navController.navigate(HomeDestination.GIAI_DAU)
+            }
+            FeatureItem("Trình độ", R.drawable.icon_trinh_do){
+                navController.navigate(HomeDestination.TRINH_DO)
+            }
+            FeatureItem("Luật", R.drawable.img){
+                navController.navigate(HomeDestination.LUAT_DAU)
+            }
         }
     }
 }
 
 
 @Composable
-fun FeatureItem(title: String, iconRes: Int) {
+fun FeatureItem(title: String, iconRes: Int, onClick: () -> Unit) {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.clickable { onClick() }
+
     ) {
         // Dùng Image thay vì Icon để giữ nguyên màu ảnh gốc
         Image(
@@ -293,23 +309,25 @@ fun EventCard(title: String, address: String, time: String, imageRes: Int) {
     }
 }
 @Composable
-fun BottomNavigationBar() {
+fun BottomNavigationBar(navController: NavController) {
+    val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
+
     NavigationBar(containerColor = Color.White) {
         NavigationBarItem(
-            selected = true,
-            onClick = {},
+            selected = currentDestination == HomeDestination.HOME,
+            onClick = { navController.navigate(HomeDestination.HOME) },
             icon = { Icon(painterResource(R.drawable.baseline_home_24), contentDescription = "Trang chủ") },
             label = { Text("Trang chủ") }
         )
         NavigationBarItem(
-            selected = false,
-            onClick = {},
+            selected = currentDestination == HomeDestination.BXH,
+            onClick = { navController.navigate(HomeDestination.BXH) },
             icon = { Icon(painterResource(R.drawable.outline_leaderboard_24), contentDescription = "BXH") },
             label = { Text("Bảng xếp hạng") }
         )
         NavigationBarItem(
-            selected = false,
-            onClick = {},
+            selected = currentDestination == HomeDestination.MENU,
+            onClick = { navController.navigate(HomeDestination.MENU) },
             icon = { Icon(painterResource(R.drawable.outline_menu_24), contentDescription = "Menu") },
             label = { Text("Menu") }
         )
@@ -319,10 +337,11 @@ fun BottomNavigationBar() {
 
 
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewHomeScreen() {
-    PolyBookingTheme {
-        HomeScreen()
-    }
-}
+
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewHomeScreen() {
+//    PolyBookingTheme {
+//        HomeScreen()
+//    }
+//}
