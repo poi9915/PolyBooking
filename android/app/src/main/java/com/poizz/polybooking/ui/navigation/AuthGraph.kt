@@ -5,22 +5,34 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.poizz.polybooking.data.remote.SupabaseClientInstance
+import com.poizz.polybooking.properties.AuthDestinations
 import com.poizz.polybooking.ui.screen.auth.LoginScreen
 import com.poizz.polybooking.ui.screen.auth.SignupScreen
-import io.github.jan.supabase.SupabaseClient
 
 @Composable
 fun AuthGraph(
-    supabase: SupabaseClient,
+    supabase: SupabaseClientInstance,
     onLoginSuccess: () -> Unit,
     navController: NavHostController = rememberNavController(),
 ) {
     NavHost(navController = navController, startDestination = AuthDestinations.LOGIN) {
         composable(AuthDestinations.LOGIN) {
-            LoginScreen()
+            LoginScreen(
+                supabase = supabase,
+                onLoginSuccess = onLoginSuccess,
+                onNavigateToSignup = {
+                    navController.navigate(AuthDestinations.SIGNUP)
+            })
         }
         composable(AuthDestinations.SIGNUP) {
-            SignupScreen()
+            SignupScreen(
+                supabase = supabase,
+                onSignupSuccess = onLoginSuccess,
+                onNavigateBackToLogin = {
+                    navController.navigate(AuthDestinations.LOGIN)
+                }
+            )
         }
     }
 }

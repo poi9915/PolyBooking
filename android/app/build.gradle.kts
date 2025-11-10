@@ -23,7 +23,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-
+        buildConfigField("String", "WEB_CLIENT_ID", "\"627980519171-4nbg8b6nco6ufpvrk0doj8ccac9o9sdi.apps.googleusercontent.com\"")
     }
 
     buildTypes {
@@ -42,6 +42,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 kotlin{
@@ -70,6 +71,7 @@ dependencies {
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 //    Material ICON
     implementation("androidx.compose.material:material-icons-extended:1.6.7")
+    implementation("io.ktor:ktor-client-android")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

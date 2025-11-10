@@ -1,4 +1,4 @@
-package com.poizz.polybooking.ui.navigation
+package com.poizz.polybooking.properties
 
 object Graph {
     const val AUTH = "auth_graph"
@@ -12,4 +12,7 @@ object AuthDestinations {
 
 object HomeDestination {
     const val MAIN = "main"
+    const val HOME = "home"
+    const val HISTORY = "history"
+    const val SETTINGS = "setting"
 }

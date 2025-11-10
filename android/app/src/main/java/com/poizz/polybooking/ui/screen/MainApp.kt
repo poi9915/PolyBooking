@@ -7,11 +7,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.poizz.polybooking.data.remote.SupabaseClient
+import com.poizz.polybooking.data.remote.SupabaseClientInstance
 import com.poizz.polybooking.ui.navigation.AuthGraph
 import com.poizz.polybooking.ui.navigation.HomeGraph
 import com.poizz.polybooking.ui.screen.component.LoadingScreen
 import io.github.jan.supabase.auth.auth
+import kotlinx.coroutines.delay
 
 sealed class AuthState {
     object Loading : AuthState()
@@ -21,15 +22,16 @@ sealed class AuthState {
 
 @Composable
 fun MainApp(modifier: Modifier = Modifier) {
-    val supabase = SupabaseClient.client
+    val supabase = SupabaseClientInstance
     var authState by remember { mutableStateOf<AuthState>(AuthState.Loading) }
     //Get supabase auth session
     LaunchedEffect(Unit) {
         authState = AuthState.Loading
-        val session = supabase.auth.currentSessionOrNull()
+        delay(1000)
+        val session = supabase.client.auth.currentSessionOrNull()
         authState = if (session == null) AuthState.UnAuthenticated else AuthState.Authenticated
     }
-    //Check trạng thái của session , nếu có thì cho vào main , ko thì bay về auth
+    //Check trạng thái của session , nếu có thì cho vào main , ko thì về auth
     when (authState) {
         AuthState.Loading -> LoadingScreen()
         AuthState.UnAuthenticated -> AuthGraph(
