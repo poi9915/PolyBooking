@@ -1,0 +1,2 @@
+- thay dôi project jetpack compose sang react-native (expo)
+- thêm chức năng đặt sân , thanh toán , hiển thị thông báo , ql đặt sân , thông tin user

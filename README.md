@@ -1,93 +1,159 @@
-# 🏓 PolyBooking – Ứng dụng Đặt Sân Pickleball
+# 🏓 PolyBooking -- Ứng dụng Đặt Sân Pickleball
 
-**PolyBooking** là ứng dụng giúp người dùng dễ dàng **đặt sân Pickleball**, quản lý lịch đặt, thanh toán, và kết nối cộng đồng người chơi.  
-Dự án gồm **Frontend (Android App)** và **Backend (BaaS với Supabase)**.
+**PolyBooking** là ứng dụng React Native (Expo) giúp người dùng dễ
+dàng:\
+✔ tìm sân Pickleball\
+✔ đặt lịch\
+✔ quản lý đặt chỗ\
+✔ thanh toán\
+✔ kết nối cộng đồng người chơi
 
----
+Backend sử dụng **Supabase (host online)**.
 
-## 🚀 Cách Chạy Ứng Dụng
+------------------------------------------------------------------------
 
-### ⚙️ 1. Khởi chạy Backend (Database – Supabase)
+# 🚀 Cách Chạy Ứng Dụng (React Native -- Expo)
 
-**Yêu cầu:**
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/)  
-  → Mở Docker Desktop → **Settings → Docker Engine**  
-  → Bật tuỳ chọn:  
-  ```json
-  "hosts": ["tcp://localhost:2375", "npipe://"]
-  ```
-  *(hoặc bật tùy chọn trong Setting  **Expose daemon on tcp://localhost:2375 without TLS**)*
+## ✅ 1. Cài đặt môi trường
 
-- Cài đặt **Supabase CLI**:  
-  ```bash
-  npx supabase
-  ```
+### Yêu cầu:
 
-**Chạy Supabase local:**
-```bash
-cd database
-npx supabase start
+-   **Node.js** ≥ 18\
+
+-   **Expo CLI**
+
+    ``` bash
+    npm i -g expo-cli
+    ```
+
+-   **Expo Go** (nếu test trên điện thoại)
+
+-   **Android Studio** / Simulator (nếu test Android)
+
+------------------------------------------------------------------------
+
+## 🔐 2. Tạo file môi trường `.env.local`
+
+Trong thư mục gốc của project, tạo file:
+
+``` bash
+.env.local
 ```
 
-Lệnh trên sẽ:
-- Khởi chạy Postgres, Studio, API Gateway.  
-- Sinh ra thông tin kết nối (`anon key`, `service key`) để app Android sử dụng.
+Thêm nội dung sau:
 
----
-
-### 🤖 2. Khởi chạy Ứng Dụng Android
-
-1. Mở thư mục **`android`** bằng **Android Studio**.  
-2. Đợi Android Studio **sync Gradle** hoàn tất.  
-3. Chạy app trên **emulator** hoặc **thiết bị thật**.
-
----
-
-## 🧩 Cấu Trúc Thư Mục
-
-```
-PolyBooking/
-│
-├── database/              # Supabase BaaS (Database + Auth + Storage)
-│   ├── supabase/config/   # Config & schema
-│   └── ...
-│
-├── android/               # Ứng dụng Android (Frontend)
-│   ├── app/
-│   ├── build.gradle
-│   └── ...
-│
-└── README.md
+``` env
+EXPO_PUBLIC_SUPABASE_URL= ///
+EXPO_PUBLIC_SUPABASE_KEY= ///
 ```
 
----
+### ⚠️ Lưu ý:
 
-## 🛠️ Công Nghệ Sử Dụng
+-   Biến môi trường **phải bắt đầu bằng `EXPO_PUBLIC_`** để Expo cho
+    phép dùng trong client.
+------------------------------------------------------------------------
 
-| Thành phần | Công nghệ |
-|-------------|------------|
-| **Frontend** | Android (Kotlin / Jetpack Compose) |
-| **Backend (BaaS)** | Supabase (PostgreSQL + Auth + Storage) |
-| **CI/CD** | GitHub Actions |
-| **Containerization** | Docker |
+## 📦 3. Cài đặt dependencies
 
----
+``` bash
+npm install
+# hoặc
+bun install
+# hoặc
+yarn install
+```
 
-## 👥 Đội Ngũ Phát Triển
+------------------------------------------------------------------------
 
-| Vai trò | Thành viên |
-|----------|-------------|
-| Backend / Database | _Cập nhật sau_ |
-| Mobile Developer | _Cập nhật sau_ |
-| UI/UX Design | _Cập nhật sau_ |
+## ▶️ 4. Chạy ứng dụng
 
----
+``` bash
+expo start
+```
 
-## 📄 Giấy Phép
+Chọn: - **a** → chạy Android emulator\
+- **i** → chạy iOS (Mac)\
+- **Scan QR** → chạy trên Expo Go
 
-Dự án phát hành theo **MIT License**.  
-Bạn được phép sử dụng, chỉnh sửa và phân phối lại mã nguồn cho mục đích học tập hoặc nghiên cứu.
+------------------------------------------------------------------------
 
----
+# 🔌 5. Kết nối Supabase trong code
 
-> 💡 *Nếu gặp lỗi khi khởi chạy Supabase, hãy đảm bảo Docker đang chạy và daemon đã được bật qua TCP.*
+`lib/supabase.ts`:
+
+``` ts
+import { createClient } from "@supabase/supabase-js";
+
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_KEY!;
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+```
+
+Sử dụng:
+
+``` ts
+const { data, error } = await supabase.from("venues").select("*");
+```
+
+------------------------------------------------------------------------
+
+# 📁 Cấu Trúc Thư Mục
+
+    PolyBooking/
+    │
+    ├── app/                     # Expo Router screens
+    ├── components/              # UI components
+    ├── store/                   # Zustand stores
+    ├── utils/                   # Supabase client, utilities
+    │
+    ├── .env.local               # Env file 
+    ├── app.json                 # Expo config
+    └── README.md
+
+------------------------------------------------------------------------
+
+# 🛠️ Công Nghệ Sử Dụng
+
+  Thành phần           Công nghệ
+  -------------------- ------------------------------------
+  **Frontend**         React Native (Expo), Expo Router
+  **State**            Zustand
+  **Backend (BaaS)**   Supabase (Auth, Database, Storage)
+  **UI**               gluestack-ui / NativeWind
+  **Auth**             Supabase Auth
+  **Database**         PostgreSQL (Supabase)
+  **Build**            EAS Build
+
+------------------------------------------------------------------------
+
+# 📡 Supabase Online (Production)
+
+Ứng dụng sử dụng Supabase:
+
+    https://supabase.com/
+
+Chỉ cần tạo `.env.local` và thêm url , key là chạy được.
+
+------------------------------------------------------------------------
+
+# 👥 Đội Ngũ Phát Triển
+
+  Vai trò                     Thành viên
+  --------------------------- ----------------
+  Mobile App (React Native)   *Cập nhật sau*
+  Backend / Supabase          *Cập nhật sau*
+  UI/UX                       *Cập nhật sau*
+
+------------------------------------------------------------------------
+
+# 📄 Giấy Phép
+
+Dự án phát hành theo **MIT License** -- bạn được phép sử dụng cho học
+tập và nghiên cứu.
+
+------------------------------------------------------------------------
+
+``` bash
+expo start -c
+```
