@@ -416,3 +416,7 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+# Thêm các file không cần thiết vào .gitignore
+.env.local
+admin-frontend/node_modules/
+# ... (Thêm các file khác nếu cần)
