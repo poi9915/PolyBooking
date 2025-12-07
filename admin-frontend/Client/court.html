@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Sân & Giá</title>
+    <style>
+        /* Thêm style cho thẻ img và trạng thái */
+        .image-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .image-preview img {
+            max-width: 100px;
+            max-height: 100px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
+        .status-active {
+            color: green;
+            font-weight: bold;
+        }
+
+        .status-maintenance {
+            color: orange;
+            font-weight: bold;
+        }
+
+        /* Ẩn form chi tiết khi mới load */
+        #court-edit-card {
+            display: none;
+        }
+
+        /* Thêm CSS cho nhóm input và nút xóa */
+        .input-group-with-clear {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .clear-image-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            white-space: nowrap;
+        }
+
+        .clear-image-btn:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+
+        <div id="sidebar-placeholder"></div>
+
+        <div class="main-content-area">
+
+            <header class="top-header">
+                <div class="page-title">
+                    <h1>Quản lý Sân & Giá</h1>
+                    <p>Cập nhật thông tin chi tiết và giá thuê của các sân.</p>
+                </div>
+                <div class="user-profile">
+                    <div class="profile-avatar">Admin</div>
+                </div>
+            </header>
+
+            <div class="management-grid">
+
+                <section class="card field-list-card">
+                    <h3>Danh sách các Sân</h3>
+                    <button class="add-button" id="add-court-button"> Thêm Sân Mới</button>
+
+                    <div class="table-responsive">
+                        <table class="data-table field-table" id="courts-list-table">
+                            <thead>
+                                <tr>
+                                    <th>Mã Sân</th>
+                                    <th>Tên Sân</th>
+                                    <th>Khu Vực (Tỉnh/Thành)</th>
+                                    <th>Sức Chứa</th>
+                                    <th>Loại Sân/Trong Nhà</th>
+                                    <th>Trạng thái</th>
+                                    <th>Giá (VNĐ/Giờ)</th>
+                                    <th>Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody id="courts-list-tbody">
+                                <tr>
+                                    <td colspan="8">Đang tải danh sách sân...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="card pricing-card" id="court-edit-card">
+                    <h3>Chỉnh Sửa Sân</h3>
+
+                    <div class="form-group">
+                        <label for="venue-select">Chọn Khu Vực (Venue):</label>
+                        <select id="venue-select">
+                            <option value="">--- Chọn Khu Vực ---</option>
+                        </select>
+                    </div>
+
+                    <fieldset id="venue-details-fieldset">
+                        <legend>Chi tiết Khu Vực (Venue)</legend>
+
+                        <div class="form-group">
+                            <label for="venue-name">Tên Khu Vực:</label>
+                            <input type="text" id="venue-name" placeholder="Ví dụ: Khu vực Phú Thọ">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="venue-address">Địa chỉ:</label>
+                            <input type="text" id="venue-address" placeholder="Ví dụ: Số 10, Láng Hạ, Đống Đa">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="venue-country">Tỉnh/Thành phố:</label>
+                            <input type="text" id="venue-country" placeholder="Ví dụ: Hà Nội">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="venue-surface">Loại Sân:</label>
+                            <input type="text" id="venue-surface" placeholder="Ví dụ: Thảm PVC, Sân Cứng">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="venue-is-indoor">Trong Nhà (Indoor):</label>
+                            <select id="venue-is-indoor">
+                                <option value="true">Có</option>
+                                <option value="false" selected>Không</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="venue-contact-email">Email Liên Hệ:</label>
+                            <input type="email" id="venue-contact-email" placeholder="Ví dụ: contact@venue.com">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="venue-contact-phone">SĐT Liên Hệ:</label>
+                            <input type="tel" id="venue-contact-phone" placeholder="Ví dụ: 0987654321">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="venue-image-upload">Upload Ảnh Khu Vực:</label>
+                            <input type="file" id="venue-image-upload" accept="image/*" multiple>
+                            <div id="venue-images-preview" class="image-preview"></div>
+                        </div>
+                    </fieldset>
+                    <button type="button" id="edit-venue-details-btn">
+                        Sửa chi tiết Venue
+                    </button>
+                    <button type="button" id="delete-venue-btn"
+                        style="background-color:#d9534f; color:white; margin-top:10px; display:none;">
+                        Xóa Khu Vực
+                    </button>
+
+
+                    <fieldset id="court-details-fieldset">
+                        <legend>Chi tiết Sân (Court)</legend>
+                        <div class="form-group">
+                            <label for="field-name">Tên Sân:</label>
+                            <input type="text" id="field-name" placeholder="Ví dụ: Sân A, Sân Số 1">
+                        </div>
+                        <div class="form-group">
+                            <label for="field-code">Mã Sân:</label>
+                            <input type="text" id="field-code" placeholder="Ví dụ: TENNIS-A1">
+                        </div>
+                        <div class="form-group">
+                            <label for="field-capacity">Sức chứa (Người):</label>
+                            <select id="field-capacity">
+                                <option value="2" selected>2 người (Đơn)</option>
+                                <option value="4">4 người (Đôi)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="field-status">Trạng thái:</label>
+                            <select id="field-status">
+                                <option value="active" selected>Hoạt động</option>
+                                <option value="maintenance">Bảo trì</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="default-price-input">Giá mặc định (VND/giờ):</label>
+                            <input type="number" id="default-price-input" placeholder="Ví dụ: 300000" value="0">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="court-image-upload">Upload Ảnh Sân:</label>
+                            <input type="file" id="court-image-upload" accept="image/*">
+                            <div id="court-image-preview" class="image-preview"></div>
+                        </div>
+
+                    </fieldset>
+
+                    <button class="save-button" id="save-court-details-btn"> Tạo Sân</button>
+                </section>
+            </div>
+        </div>
+    </div>
+    <link rel="stylesheet" href="/Client/css/style_base.css">
+    <link rel="stylesheet" href="/Client/css/style_courts.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/Client/js/client_config.js"></script>
+    <script src="/Client/js/court_utils.js"></script>
+    <script src="/Client/js/venues_logic.js"></script>
+    <script src="/Client/js/courts_logic.js"></script>
+    <script src="/Client/js/court_main.js"></script>
+    <script src="/Client/js/loadSliderBar.js"></script>
+    <!-- <link rel="stylesheet" href="style.css">  -->
+
+
+
+</body>
+
+</html>
