@@ -1,13 +1,13 @@
 /* customer.css – ĐẸP Y HỆT COURT.HTML – ĐÃ TEST 100% */
 .management-grid {
     display: grid !important;
-    grid-template-columns: 2fr 1fr !important;
+    grid-template-columns: 1fr !important;
     gap: 30px;
     margin-top: 20px;
 }
 
-.customer-list-card   { grid-column: 1 / 2; }
-.customer-detail-card { grid-column: 2 / 3; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); min-height: 80vh; }
+.customer-list-card   { grid-column: 1 / -1; }
+.customer-detail-card { display: none; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); min-height: 80vh; }
 
 #customer-edit-card { display: none; }
 #customer-edit-card.active { display: block !important; }

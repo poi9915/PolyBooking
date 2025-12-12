@@ -25,11 +25,10 @@
 body {
     background-color: #f0f2f5;
     color: var(--text-color);
-    background-image: url('/Client/images/img-Slider3.jpg');
-    background-size: cover;
-    background-repeat: no-repeat;
+    /* background-size: cover; */
+    /* background-repeat: no-repeat;
     background-attachment: fixed;
-    background-position: center;
+    background-position: center; */
 }
 
 /* ======================================= */
@@ -41,10 +40,10 @@ body {
 }
 
 .sidebar {
-    width: 280px; 
-    background-color: #f0f2f5;
-    box-shadow: var(--shadow-medium);
-    padding: 20px 0;
+    width: 250px; 
+    background-color:var(--surface-color);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+    /* padding: 20px 0; */
     position: fixed;
     top: 0;
     height: 100vh;
@@ -69,8 +68,8 @@ body {
 .menu-item {
     display: flex;
     align-items: center;
-    padding: 12px 20px;
-    margin: 8px 0;
+    padding: 10px 15px;
+    margin: 4px 10px;
     cursor: pointer;
     font-size: 16px;
     font-weight: 500;
@@ -86,21 +85,21 @@ body {
 }
 
 .menu-item:hover:not(.active) {
-    background-color: #e9ecef;
+    background-color: var(--background-color);
     color: var(--text-color);
 }
 
 .menu-item.active {
     background-color: var(--primary-color);
     color: var(--surface-color);
-    box-shadow: 0 4px 20px rgba(0, 123, 255, 0.25);
+    box-shadow: 0 2px 10px rgba(0, 123, 255, 0.2);
     font-weight: 600;
 }
 
 .main-content-area {
     flex-grow: 1;
     padding: 30px;
-    margin-left: 280px;
+    margin-left: 250px;
 }
 
 /* TOP HEADER / NAV BAR */
@@ -109,17 +108,19 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 30px;
+    background-color: transparent;
+    padding-top: 10px; /* Thêm khoảng đệm trên nếu cần */
 }
 
 .page-title h1 {
     font-size: 28px;
     font-weight: 600;
     margin-bottom: 5px;
-    color: white;
+    color: var(--text-color);
 }
 
 .page-title p {
-    color: white;
+    color: var(--secondary-text);
     font-size: 14px;
 }
 
@@ -240,20 +241,21 @@ body {
 /* --- Bảng căn đẹp, không dính nhau --- */
 table {
     width: 100%;
-    border-collapse: separate !important;
-    border-spacing: 0 8px;   /* tạo khoảng cách giữa hàng */
+    border-collapse: collapse;
+    /* border-spacing: 0 8px;   tạo khoảng cách giữa hàng */
 }
 
 table thead th {
-    background: #007bff;
+    background: var(--primary-color);
     color: white;
-    padding: 10px;
+    padding: 12px 10px;
 }
 
 table tbody td {
-    background: #f9f9f9;
-    padding: 12px 10px;
-    border-top: 1px solid #eee;
+    background: var(--surface-color);
+    padding: 10px 10px;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
 }
 
 
@@ -273,14 +275,15 @@ table tbody td {
 .form-group input[type="number"], 
 .price-input { 
     width: 100%; 
-    padding: 10px; 
-    border: 1px solid var(--border-color); 
-    border-radius: 6px; 
+    padding: 8px 10px; 
+    border: 1px solid #ced4da; 
+    border-radius: 4px; 
     font-size: 15px; 
     transition: border-color 0.3s; 
 } 
 .form-group input:focus, .form-group select:focus {
     border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2); /* Thêm box-shadow khi focus */
     outline: none;
 }
 
@@ -288,16 +291,14 @@ table tbody td {
     background-color: var(--primary-color);
     color: white;
     border: none;
-    padding: 10px 15px;
-    border-radius: 6px;
+    padding: 8px 12px;
+    border-radius: 4px;
     cursor: pointer;
-    font-weight: 600;
+    font-weight: 500;
     transition: background-color 0.3s;
 }
 
-.action-btn:hover {
-    background-color: #0056b3;
-}
+
 
 .add-button, .save-button {
     background-color: var(--accent-color);
@@ -393,4 +394,166 @@ table tbody td {
         padding: 20px;
         margin-left: 0;
     }
+}
+/* ======================================= */
+/* 5. MODAL/DIALOG STYLES                  */
+/* ======================================= */
+
+/* Lớp nền tối bao phủ toàn màn hình */
+.modal-header {
+    display: flex;
+    justify-content: space-between; /* Đẩy tiêu đề sang trái, nút đóng sang phải */
+    align-items: center;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 20px;
+}
+.modal-overlay {
+    display: none; /* Mặc định ẩn */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Nền tối nhẹ */
+    z-index: 1000; /* Đảm bảo nằm trên mọi thứ */
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-overlay.active {
+    display: flex; /* Hiện thị khi có class active */
+}
+
+/* Thẻ nội dung Modal (Dialog) */
+.modal-content {
+    background: var(--surface-color); /* Nền trắng */
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto; /* Cho phép cuộn nếu nội dung dài */
+    min-width: 400px;
+    animation: fadeIn 0.3s ease-out; /* Thêm hiệu ứng */
+    z-index: 1001;
+}
+
+/* Nút Đóng (X) */
+.close-btn {
+    /* Đảm bảo nó không bị ảnh hưởng bởi font-size chung */
+    background: none; 
+    border: none;
+    color: var(--text-color); /* Màu chữ mặc định */
+    font-size: 24px; /* 💥 LÀM RÕ HƠN (Tăng kích thước) */
+    font-weight: bold; /* 💥 LÀM RÕ HƠN (In đậm) */
+    cursor: pointer;
+    line-height: 1; /* Đảm bảo căn chỉnh tốt */
+    padding: 0 5px; /* Thêm padding click area */
+    transition: color 0.2s;
+}
+.close-btn:hover {
+    color: var(--danger-color); /* Đổi màu khi hover để người dùng nhận biết */
+}
+/* CÁC NÚT CHUNG */
+.primary-button, .secondary-button, .danger-button {
+    /* Tăng kích thước cơ bản cho tất cả các nút */
+    padding: 10px 20px; /* Tăng padding */
+    font-size: 16px;    /* Tăng font size */
+    border-radius: 8px; /* Bo góc nhẹ */
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, box-shadow 0.2s;
+    border: 1px solid transparent; /* Mặc định có border để giữ kích thước */
+}
+
+/* NÚT CHÍNH (LƯU / TẠO) */
+.primary-button {
+    background-color: var(--primary-color);
+    color: white;
+    min-width: 120px; /* Đảm bảo đủ rộng cho chữ "Lưu Thay Đổi" */
+    box-shadow: var(--shadow-medium); /* Thêm box shadow nhẹ cho nổi bật */
+}
+
+.primary-button:hover {
+    background-color: #0056b3; /* Màu đậm hơn khi hover */
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+/* Hiệu ứng mờ dần khi hiện lên */
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* Ẩn các card chi tiết cũ */
+.customer-detail-card, 
+.staff-detail-card, 
+#court-edit-card, 
+#pricing-edit-card {
+    /* Quan trọng: Các card này sẽ được chuyển thành nội dung của modal */
+    display: none !important; 
+}
+/* Thẻ nội dung Modal (Dialog) */
+.modal-content {
+    background: var(--surface-color); /* Nền trắng */
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 800px; /* Giữ nguyên 800px nếu bạn muốn modal Khu vực rộng */
+    max-height: 90vh;
+    overflow-y: auto; /* Cho phép cuộn nếu nội dung dài */
+    min-width: 400px;
+    animation: fadeIn 0.3s ease-out; /* Thêm hiệu ứng */
+    z-index: 1001;
+}
+
+/* THÊM: Class cho Modal nhỏ gọn (Small Modal) - Giống hình bạn gửi (Staff Modal) */
+.modal-content.small-modal {
+    max-width: 500px; /* Thiết lập kích thước nhỏ hơn */
+}
+/* Thêm style cho Modal Footer để chứa các nút hành động (Lưu, Hủy) */
+.modal-footer {
+    display: flex;
+    justify-content: flex-end; /* Căn các nút sang phải */
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+    margin-top: 20px;
+    gap: 15px; /* Khoảng cách giữa các nút */
+}
+/* Đảm bảo các nút có kích thước và màu sắc chuẩn */
+/* Nút LƯU (Xanh lá - giống nút "Lưu" trong hình) */
+#save-venue-details-btn, #save-court-details-btn {
+    background-color: var(--accent-color); /* Xanh lá */
+}
+
+/* Nút HỦY (Đỏ - giống nút "Hủy" trong hình) */
+.danger-button {
+    background-color: var(--danger-color); /* Đỏ */
+    color: white;
+}
+.danger-button:hover {
+    background-color: #c82333;
+}
+/* CẬP NHẬT CÁC NÚT CHUNG để sử dụng màu accent cho nút chính */
+.primary-button {
+    /* Đổi màu chính (Lưu) từ primary-color sang accent-color để match hình ảnh */
+    background-color: var(--accent-color); /* Xanh lá */
+    color: white;
+    min-width: 120px;
+    box-shadow: var(--shadow-medium);
+}
+.primary-button:hover {
+    background-color: #1e7e34; /* Màu đậm hơn khi hover (từ accent) */
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+/* THÊM NÚT PHỤ (HUỶ) */
+.secondary-button {
+    background-color: var(--danger-color); /* Đỏ */
+    color: white;
+    min-width: 120px;
+}
+.secondary-button:hover {
+    background-color: #c82333;
 }

@@ -1,13 +1,9 @@
 /* Styles RIÊNG cho trang Báo cáo & Thống kê */
-
-.filter-controls {
-    display: flex;
-    gap: 20px;
-    align-items: flex-end; 
-}
-
 .filter-group {
-    flex-grow: 1;
+   /* Đảm bảo mỗi nhóm chiếm ít nhất 180px và linh hoạt mở rộng */
+    flex: 1 1 180px; 
+    display: flex; /* Dùng flex cho form-group để căn label và input */
+    flex-direction: column; /* Label trên, Input dưới */
 }
 
 /* KPI SUMMARY (Dành cho trang Báo cáo)*/
@@ -37,7 +33,11 @@
 /* Button Màu chính*/
 .primary-btn {
     background-color: var(--primary-color);
-    color: white;
+    color: white;;
+}
+#btn-refresh {
+    margin-left: auto; /* Đẩy nút Lọc về bên phải */
+    margin-bottom: 15px;
 }
 
 .primary-btn:hover {
@@ -118,7 +118,10 @@
     min-width: 180px;
     flex: 1 1 180px;
 }
-
+.filter-group label {
+    margin-bottom: 5px; /* Khoảng cách giữa label và input */
+    font-weight: 600;
+}
 /* nút hành động không bị chèn lên selects */
 .filter-controls .action-btn {
     flex: 0 0 auto;
@@ -203,7 +206,47 @@
     padding: 0 !important;
     margin: 0 !important;
 }
+.success-kpi .kpi-value {
+    color: #28a745; /* xanh lá */
+}
 
+.cancel-kpi .kpi-value {
+    color: #dc3545; /* đỏ */
+}
+.status-success {
+    color: #0dbb39;
+    font-weight: 600;
+}
+.filter-group select,
+.filter-group input[type="date"],
+.filter-group input[type="week"],
+.filter-group input[type="month"] {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    height: 38px; /* Cố định chiều cao để đồng bộ với nút Lọc */
+}
+#filter-time-controls {
+    flex: 2 1 360px; /* Cho nó rộng hơn vì có thể chứa 2 input */
+}
+
+#filter-time-controls #date-inputs {
+    display: flex;
+    gap: 8px; /* Khoảng cách giữa date-from và date-to */
+}
+
+#filter-time-controls #date-inputs input {
+    flex: 1 1 0; /* Cho 2 input ngày bằng nhau và mở rộng */
+}
+
+
+/* Nút Lọc căn lề phải của nhóm */
+.filter-controls #btn-refresh {
+    flex: 0 0 auto; 
+    padding: 10px 20px; /* Thêm padding cho nút đẹp hơn */
+    height: 38px; /* Cố định chiều cao */
+    min-width: 100px;
+}
 
 
 /* 7) Nếu vẫn thấy phần header bị che bởi sidebar khi scroll,

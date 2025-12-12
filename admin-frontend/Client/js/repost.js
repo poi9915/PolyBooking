@@ -4,13 +4,13 @@ function setLoading(isLoading) {
     const tbody = document.getElementById("table-body");
     if (!tbody) return;
     if (isLoading) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Đang tải dữ liệu...</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;">Đang tải dữ liệu...</td></tr>`;
     }
 }
 function setEmpty(message = "Không có dữ liệu") {
     const tbody = document.getElementById("table-body");
     if (!tbody) return;
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">${message}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;">${message}</td></tr>`;
 }
 
 // ---------- PARSE & FORMAT ----------
@@ -30,13 +30,31 @@ function parseTstzRange(rangeText) {
 function formatMoney(num) {
     return Number(num || 0).toLocaleString("vi-VN") + " đ";
 }
-function formatDate(d) {
-    if (!d) return "-";
-    return new Date(d).toLocaleDateString("vi-VN");
-}
 function formatDateTime(d) {
     if (!d) return "-";
-    return new Date(d).toLocaleString("vi-VN");
+    // KHÔNG cần new Date().setHours()
+    const options = {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZone: 'Asia/Ho_Chi_Minh', // Múi giờ Việt Nam (GMT+7)
+        hour12: false
+    };
+    return new Date(d).toLocaleString("vi-VN", options);
+}
+
+function formatDate(d) {
+    if (!d) return "-";
+    const options = {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        timeZone: 'Asia/Ho_Chi_Minh' // Múi giờ Việt Nam (GMT+7)
+    };
+    return new Date(d).toLocaleDateString("vi-VN", options);
 }
 function calcHours(start, end) {
     if (!start || !end) return 0;
@@ -51,7 +69,19 @@ async function loadBookings() {
 
     const { data, error } = await supabaseClient
         .from("bookings")
-        .select("*")
+        .select(`
+        *,
+        profiles:user_id (
+            email
+        ),
+        courts:court_id (
+            name,
+            venue_id,
+            venues:venue_id (
+                name
+            )
+        )
+    `)
         .order("created_at", { ascending: false });
 
     if (error) {
@@ -61,15 +91,20 @@ async function loadBookings() {
 
     return data.map(row => ({
         id: row.id,
-        court_id: row.court_id,
         price: Number(row.price || 0),
+        status: row.status,
         created_at: row.created_at,
+        email: row.profiles?.email || "Không có email",
+        court_name: row.courts?.name || "Không rõ",
+        venue_name: row.courts?.venues?.name || "Không rõ",
         during: parseTstzRange(row.during)
     }));
 }
 
 // ---------- RENDER BẢNG + TOTAL ----------
 function renderTable(list) {
+    console.log("STATUS RAW = ", list.map(x => x.status));
+
     const tbody = document.getElementById("table-body");
     if (!tbody) return;
     tbody.innerHTML = "";
@@ -77,6 +112,7 @@ function renderTable(list) {
     if (!list || list.length === 0) {
         setEmpty("Không có booking phù hợp");
         updateTotals(0, 0);
+        updateSuccessCancel(0, 0);
         return;
     }
 
@@ -84,25 +120,45 @@ function renderTable(list) {
         const hours = calcHours(b.during.start, b.during.end);
         const tr = document.createElement("tr");
         tr.innerHTML = `
-            <td>${b.id}</td>
-            <td>${formatDate(b.created_at)}</td>
-            <td>${formatDateTime(b.during.start)}</td>
-            <td>${formatDateTime(b.during.end)}</td>
-            <td>${hours}</td>
-            <td>${formatMoney(b.price)}</td>
-        `;
+        <td>${b.id}</td>
+        <td>${b.email}</td>
+        <td class="${b.status === 'completed' ? 'status-success' : ''}">
+            ${b.status === 'completed' ? 'Hoàn thành' : b.status}
+        </td>
+        <td>${b.venue_name}</td>
+        <td>${formatDate(b.created_at)}</td>
+        <td>${formatDateTime(b.during.start)}</td>
+        <td>${formatDateTime(b.during.end)}</td>
+        <td>${hours}</td>
+        <td>${formatMoney(b.price)}</td>
+            `;
         tbody.appendChild(tr);
     });
 
     const totalHours = list.reduce((s, b) => s + calcHours(b.during.start, b.during.end), 0);
     const totalMoney = list.reduce((s, b) => s + (b.price || 0), 0);
     updateTotals(totalHours, totalMoney);
+    let totalSuccess = list.filter(b =>
+        ["completed"].includes(b.status)
+    ).length;
+    updateSuccessCancel(totalSuccess);
+    // let totalCancel = list.filter(b =>
+    //     ["Đã hủy"].includes(b.status)
+    // ).length;
+
+    // updateSuccessCancel(totalSuccess, totalCancel);
 }
 function updateTotals(hours, money) {
     const elH = document.getElementById("total-hours");
     const elM = document.getElementById("total-money");
     if (elH) elH.innerText = hours;
     if (elM) elM.innerText = formatMoney(money);
+}
+function updateSuccessCancel(successCount) {
+    const elS = document.getElementById("total-success");
+    // const elC = document.getElementById("total-cancel");
+    if (elS) elS.innerText = successCount;
+    //     if (elC) elC.innerText = cancelCount;
 }
 
 // ---------- BỘ LỌC ----------
@@ -126,7 +182,7 @@ function getISOWeekStart(year, week) {
     const day = base.getDay();
     const start = new Date(base);
     start.setDate(base.getDate() - ((day + 6) % 7));
-    start.setHours(0,0,0,0);
+    start.setHours(0, 0, 0, 0);
     return start;
 }
 function filterByWeek(list) {
@@ -135,7 +191,7 @@ function filterByWeek(list) {
     const [year, weekNum] = week.split("-W");
     if (!year || !weekNum) return list;
     const start = getISOWeekStart(Number(year), Number(weekNum));
-    const end = new Date(start); end.setDate(start.getDate() + 6); end.setHours(23,59,59,999);
+    const end = new Date(start); end.setDate(start.getDate() + 6); end.setHours(23, 59, 59, 999);
     return list.filter(b => {
         const d = b.created_at ? new Date(b.created_at) : null;
         return d && d >= start && d <= end;
@@ -149,6 +205,11 @@ function filterByMonth(list) {
         const d = b.created_at ? new Date(b.created_at) : null;
         return d && d.getFullYear() == Number(year) && (d.getMonth() + 1) == Number(month);
     });
+}
+function filterByVenue(list) {
+    const venue = document.getElementById("filter-venue")?.value;
+    if (!venue || venue === "all") return list;
+    return list.filter(b => b.venue_name === venue);
 }
 
 // ---------- UI: ẨN/HIỆN nhóm lọc ----------
@@ -169,9 +230,14 @@ function onFilterTypeChange() {
 // ---------- ÁP DỤNG BỘ LỌC (khi nhấn nút hoặc đổi) ----------
 function applyFilters() {
     if (!allBookings) return;
+
     let list = allBookings.slice();
+    // LUÔN lọc chỉ lấy đơn completed
+    list = list.filter(b => b.status === "completed");
+
     const type = document.getElementById("filter-type")?.value || "none";
 
+    // --- Lọc theo thời gian ---
     if (type === "none") {
         list = filterToday(list);
     } else if (type === "date") {
@@ -181,11 +247,16 @@ function applyFilters() {
     } else if (type === "month") {
         list = filterByMonth(list);
     }
+
+    // --- Lọc theo khu vực ---
+    list = filterByVenue(list);
+
     renderTable(list);
 }
 
 // ---------- INIT ----------
 let allBookings = [];
+
 
 document.addEventListener("DOMContentLoaded", async () => {
     // Ẩn hết nhóm filter ban đầu
@@ -219,17 +290,29 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Gắn event (an toàn: kiểm tra tồn tại)
         document.getElementById("filter-type")?.addEventListener("change", onFilterTypeChange);
         document.getElementById("btn-refresh")?.addEventListener("click", applyFilters);
-        document.getElementById("date-from")?.addEventListener("change", () => {
-            if (document.getElementById("filter-type")?.value === "date") applyFilters();
-        });
-        document.getElementById("date-to")?.addEventListener("change", () => {
-            if (document.getElementById("filter-type")?.value === "date") applyFilters();
-        });
-        document.getElementById("week-select")?.addEventListener("change", () => {
-            if (document.getElementById("filter-type")?.value === "week") applyFilters();
-        });
-        document.getElementById("month-select")?.addEventListener("change", () => {
-            if (document.getElementById("filter-type")?.value === "month") applyFilters();
-        });
+
+      
     }
 });
+
+async function loadVenues() {
+    const { data } = await supabaseClient
+        .from("venues")
+        .select("id, name");
+
+    const select = document.getElementById("filter-venue");
+    data.forEach(v => {
+        const opt = document.createElement("option");
+        opt.value = v.name;
+        opt.innerText = v.name;
+        select.appendChild(opt);
+    });
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+    await loadVenues();
+    document.getElementById("filter-venue")
+        ?.addEventListener("change", applyFilters);
+});
+
+

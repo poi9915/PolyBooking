@@ -1,311 +1,236 @@
-// staff.js (MÃ ĐÃ SỬA VÀ HỢP NHẤT)
-
-// ===================================================================
-// KHAI BÁO BIẾN TOÀN CỤC MỚI VÀ ĐỒNG BỘ
-// ===================================================================
-// Giả định supabaseClient đã được định nghĩa trong client_config.js
-
-let currentStaffId = null; // ID nhân viên đang được sửa
-let isAddingNew = false;   // Cờ xác định chế độ (Thêm mới/Sửa)
-
-const staffListTableBody = document.getElementById('staff-list-tbody');
-const addStaffButton = document.getElementById('add-staff-button');
-
-// Thẻ chi tiết/sửa (Unified Card)
-const staffDetailCard = document.getElementById('staff-detail-card'); 
-// Form chung (Unified Form ID)
-const staffUnifiedForm = document.getElementById('staff-unified-form'); 
-// Các nút trong form chung
-const saveStaffButton = document.getElementById('save-staff-btn');
-const cancelStaffButton = document.getElementById('cancel-staff-btn');
-
-
-// ===================================================================
-// I. LOGIC HIỂN THỊ DANH SÁCH (READ)
-// (GIỮ NGUYÊN)
-// ===================================================================
+// =========================================
+// TẢI DANH SÁCH NHÂN VIÊN
+// =========================================
 
 async function fetchStaffList() {
-    // ... (logic fetchStaffList giữ nguyên) ...
-    const { data: staff, error } = await supabaseClient
-        .from('super_users')
-        .select(`id, username, email, role`)
-        .eq('role', 'employee')
-        .order('id', { ascending: true });
+    const { data, error } = await supabaseClient
+        .from("super_users")
+        .select(`
+            id,
+            username,
+            email,
+            role,
+            password,
+            _venue_id,
+            venues:_venue_id ( name, address )
+        `)
+        .eq("role", "employee")
+        .order("id");
 
     if (error) {
-        console.error("Lỗi khi tải danh sách nhân viên:", error.message);
+        console.error("Lỗi tải staff:", error.message);
         return;
     }
 
-    renderStaffList(staff);
+    renderStaffList(data);
 }
 
-function renderStaffList(staff) {
-    // ... (logic renderStaffList giữ nguyên) ...
-    const staffListTableBody = document.getElementById('staff-list-tbody');
-    staffListTableBody.innerHTML = ''; 
+function renderStaffList(list) {
+    const tbody = document.getElementById("staff-list-tbody");
+    tbody.innerHTML = "";
 
-    if (!staff || staff.length === 0) {
-        staffListTableBody.innerHTML = '<tr><td colspan="6">Chưa có nhân viên nào được tạo.</td></tr>';
+    if (!list || list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7">Chưa có nhân viên</td></tr>`;
         return;
     }
 
-    staff.forEach((person, index) => { 
-        const stt = index + 1; 
-
-        const row = `
-            <tr data-id="${person.id}">
-                <td>${stt}</td> 
-                <td>${person.username}</td>
-                <td>${person.email}</td>
-                <td>${person.role || 'Nhân viên'}</td>
-                
+    list.forEach((s, i) => {
+        tbody.innerHTML += `
+            <tr>
+                <td>${i + 1}</td>
+                <td>${s.username}</td>
+                <td>${s.email}</td>
+                <td>${s.role ==='employee' ? "Nhân viên" : s.role  }</td>
+                <td>${s.venues?.name || "Chưa gán"}</td>
+                <td>${s.venues?.address || "---"}</td>
                 <td>
-                    <button class="action-btn edit-staff-btn" data-id="${person.id}">Sửa</button>
-                    <button class="action-btn delete-staff-btn" data-id="${person.id}">Xóa</button>
+                    <button class="edit-staff-btn" data-id="${s.id}">Sửa</button>
+                    <button class="delete-staff-btn" data-id="${s.id}">Xóa</button>
                 </td>
             </tr>
         `;
-        staffListTableBody.insertAdjacentHTML('beforeend', row);
     });
 }
 
-// ===================================================================
-// II. LOGIC THÊM/SỬA (CREATE & UPDATE) - HỢP NHẤT
-// ===================================================================
+// =========================================
+// MODAL & LOGIC
+// =========================================
 
-/**
- * Hàm chung để ẩn Card Chi tiết/Sửa
- */
-function hideDetailCard() {
-    currentStaffId = null;
-    isAddingNew = false;
-    
-    staffUnifiedForm.reset(); 
-    staffDetailCard.style.display = 'none';
+const modal = document.getElementById("staff-modal");
+const saveBtn = document.getElementById("modal-save-btn");
+const cancelBtn = document.getElementById("modal-cancel-btn");
+
+let editingId = null;
+let oldPassword = "";
+
+// =========================================
+// Tải danh sách khu vực
+// =========================================
+
+async function loadVenues() {
+    const { data } = await supabaseClient
+        .from("venues")
+        .select("id, name, address");
+
+    const select = document.getElementById("modal-staff-venue");
+    select.innerHTML = `<option value="">-- Chọn khu vực --</option>`;
+
+    data.forEach(v => {
+        const opt = document.createElement("option");
+        opt.value = v.id;
+        opt.innerText = `${v.name} (${v.address})`;
+        select.appendChild(opt);
+    });
 }
 
-/**
- * Hàm chung để hiển thị Form và tải dữ liệu (nếu là chế độ Sửa)
- */
-async function showDetailCard(mode = 'add', id = null) {
-    isAddingNew = mode === 'add';
-    currentStaffId = id;
+// =========================================
+// MỞ MODAL - THÊM NHÂN VIÊN
+// =========================================
 
-    // Reset form trước
-    staffUnifiedForm.reset();
-    
-    // Đặt Tiêu đề và Nút
-    const titleElement = document.getElementById('form-title');
-    const passwordInput = document.getElementById('staff-password-input');
-    const emailInput = document.getElementById('staff-email-input');
-    // Đảm bảo các trường luôn có thể chỉnh sửa và bắt buộc (theo yêu cầu DB)
-    emailInput.readOnly = false; 
-    passwordInput.readOnly = false;
-    emailInput.classList.remove('non-editable'); // Xóa class non-editable
-    
-    // Mặc định cả hai trường đều bắt buộc
-    emailInput.required = true;
-    passwordInput.required = true;
+document.getElementById("add-staff-button").addEventListener("click", async () => {
+    editingId = null;
 
-    if (isAddingNew) {
-        // Chế độ THÊM MỚI
-        titleElement.textContent = ' Thêm Tài Khoản Nhân Viên Mới';
-        saveStaffButton.textContent = 'Tạo Tài Khoản';
-        passwordInput.required = true; // Bắt buộc nhập khi Thêm mới
-        passwordInput.placeholder = 'Nhập mật khẩu (ít nhất 6 ký tự)';
+    document.getElementById("staff-modal-title").innerText = "Thêm Nhân viên";
+    document.getElementById("modal-staff-name").value = "";
+    document.getElementById("modal-staff-email").value = "";
+    document.getElementById("modal-staff-password").value = "";
+    document.getElementById("modal-staff-role").value = "employee";
 
-    } else {
-        // Chế độ CẬP NHẬT
-        titleElement.textContent = ' Cập Nhật Chi Tiết Nhân Viên';
-        saveStaffButton.textContent = 'Lưu Cập Nhật';
-        
+    await loadVenues();
 
-        // 1. Tải dữ liệu
-        const { data: staff, error } = await supabaseClient
-            .from('super_users')
-            //  PHẢI SELECT CỘT 'password' để lưu tạm 
-            .select(`id, username, email, role, password`) 
-            .eq('id', id)
-            .single();
+    modal.showModal();
+});
 
-        if (error) { 
-            console.error("Lỗi khi tải chi tiết nhân viên:", error.message);
-            hideDetailCard();
-            return;
-        }
+// =========================================
+// CLICK SỬA NHÂN VIÊN
+// =========================================
 
-        // 2. Đổ dữ liệu vào Form (Sử dụng ID mới đã sửa trong HTML)
-        document.getElementById('staff-name-input').value = staff.username;
-        document.getElementById('staff-email-input').value = staff.email; 
-        document.getElementById('staff-role-input').value = staff.role;
-        document.getElementById('staff-password-input').value = staff.password
-        // KHÔNG đổ mật khẩu vào input
-        
-        // 3. Lưu mật khẩu cũ (Quan trọng cho logic UPDATE)
-        staffUnifiedForm.dataset.oldPassword = staff.password; 
-    }
-    
-    // Hiển thị Form
-    staffDetailCard.style.display = 'block';
-}
+document.addEventListener("click", async (e) => {
+    if (!e.target.classList.contains("edit-staff-btn")) return;
 
-/**
- * Xử lý Lưu (INSERT) hoặc Cập nhật (UPDATE)
- */
-async function handleSaveStaff(event) {
-    event.preventDefault();
+    editingId = e.target.dataset.id;
 
-    // LẤY DỮ LIỆU TỪ INPUT CỦA FORM CHUNG (dùng ID mới)
-    const username = document.getElementById('staff-name-input').value.trim();
-    const email = document.getElementById('staff-email-input').value.trim();
-    const newPassword = document.getElementById('staff-password-input').value;
-    const role = document.getElementById('staff-role-input').value;
-    
-    if (!username || !email || !role) {
-        alert("Vui lòng điền đầy đủ Tên, Email và Vai trò.");
+    const { data, error } = await supabaseClient
+        .from("super_users")
+        .select("*")
+        .eq("id", editingId)
+        .single();
+
+    if (error) return console.error(error);
+
+    oldPassword = data.password || "";
+
+    document.getElementById("staff-modal-title").innerText = "Sửa Nhân viên";
+    document.getElementById("modal-staff-name").value = data.username;
+    document.getElementById("modal-staff-email").value = data.email;
+    document.getElementById("modal-staff-password").value = data.password;
+    document.getElementById("modal-staff-role").value = data.role;
+
+    await loadVenues();
+    document.getElementById("modal-staff-venue").value = data._venue_id;
+
+    modal.showModal();
+});
+
+// =========================================
+// NÚT LƯU (THÊM HOẶC SỬA)
+// =========================================
+
+saveBtn.addEventListener("click", async () => {
+    const name = document.getElementById("modal-staff-name").value;
+    const email = document.getElementById("modal-staff-email").value;
+    const pass = document.getElementById("modal-staff-password").value;
+    const role = document.getElementById("modal-staff-role").value;
+    const venue = document.getElementById("modal-staff-venue").value;
+
+    if (!name || !email || !role || !venue) {
+        alert("Vui lòng nhập đầy đủ thông tin.");
         return;
     }
 
-    let result;
-    let dataToSubmit = {
-        username: username,
-        full_name: username, // Giả định full_name = username
-        email: email,
-        role: role,
-        updated_at: new Date().toISOString()
-    };
-
-    if (isAddingNew) {
-        // --- LOGIC THÊM MỚI (CREATE) ---
-        if (!newPassword || newPassword.length < 6) {
-            alert("Mật khẩu phải có ít nhất 6 ký tự.");
+    // ---------------------------
+    // THÊM NHÂN VIÊN
+    // ---------------------------
+    if (editingId === null) {
+        if (!pass || pass.length < 6) {
+            alert("Mật khẩu phải có ít nhất 6 ký tự!");
             return;
         }
 
-        const newManualId = crypto.randomUUID();
-        dataToSubmit = {
-            ...dataToSubmit,
-            id: newManualId,
-            password: newPassword,
-            created_at: new Date().toISOString()
+        const { error } = await supabaseClient
+            .from("super_users")
+            .insert({
+                id: crypto.randomUUID(),
+                username: name,
+                email: email,
+                password: pass,
+                role: role,
+                _venue_id: venue
+            });
+
+        if (error) alert(error.message);
+        else alert("Đã thêm nhân viên!");
+    }
+    // ---------------------------
+    // SỬA NHÂN VIÊN
+    // ---------------------------
+    else {
+        const payload = {
+            username: name,
+            email: email,
+            role: role,
+            _venue_id: venue
         };
 
-        const { error } = await supabaseClient
-            .from('super_users')
-            .insert([dataToSubmit]);
-
-        result = { error, successMessage: " Tạo tài khoản nhân viên thành công!" };
-
-    } else {
-        // --- LOGIC CẬP NHẬT (UPDATE) ---
-        if (!currentStaffId) {
-            alert("Lỗi: Không tìm thấy ID nhân viên để cập nhật.");
-            return;
-        }
-        
-        const oldPassword = staffUnifiedForm.dataset.oldPassword;
-
-        // Logic Mật khẩu (Sử dụng mật khẩu mới nếu có, nếu không thì dùng mật khẩu cũ)
-        if (newPassword && newPassword.length >= 6) {
-            dataToSubmit.password = newPassword; 
-        } else if (oldPassword) {
-            dataToSubmit.password = oldPassword; 
+        // nếu người dùng nhập mật khẩu mới
+        if (pass.trim() !== "") {
+            if (pass.trim().length < 6) {
+                alert("Mật khẩu mới phải ít nhất 6 ký tự!");
+                return;
+            }
+            payload.password = pass;
         } else {
-            alert("Lỗi: Mật khẩu không được để trống và phải có ít nhất 6 ký tự.");
-            return;
+            // giữ nguyên mật khẩu cũ
+            payload.password = oldPassword;
         }
 
         const { error } = await supabaseClient
-            .from('super_users')
-            .update(dataToSubmit)
-            .eq('id', currentStaffId);
+            .from("super_users")
+            .update(payload)
+            .eq("id", editingId);
 
-        result = { error, successMessage: " Cập nhật nhân viên thành công!" };
-    }
-    
-    // XỬ LÝ KẾT QUẢ
-    if (result.error) {
-        console.error(result.error);
-        alert(`Lỗi: ${result.error.message}.`);
-        return;
+        if (error) alert(error.message);
+        else alert("Đã cập nhật nhân viên!");
     }
 
-    alert(result.successMessage);
-
-    hideDetailCard(); // Ẩn form sau khi lưu
-    await fetchStaffList();
-}
-
-
-// ===================================================================
-// III. LOGIC XÓA (DELETE)
-// (GIỮ NGUYÊN)
-// ===================================================================
-
-async function handleDeleteStaff(staffId) {
-    if (!confirm("Bạn có chắc chắn muốn xóa nhân viên này không?")) {
-        return;
-    }
-
-    const { error: deleteError } = await supabaseClient
-        .from('super_users')
-        .delete()
-        .eq('id', staffId);
-
-    if (deleteError) {
-        alert(`Lỗi khi xóa nhân viên: ${deleteError.message}`);
-        return;
-    }
-    
-    alert(" Xóa/Vô hiệu hóa nhân viên thành công!");
-    await fetchStaffList();
-}
-
-
-// ===================================================================
-// IV. LOGIC UI/EVENTS - CẬP NHẬT
-// ===================================================================
-
-// Lắng nghe sự kiện click trên bảng (Sửa/Xóa)
-staffListTableBody.addEventListener('click', (e) => {
-    const target = e.target;
-    const staffId = target.dataset.id;
-    
-    if (!staffId) return;
-
-    if (target.classList.contains('edit-staff-btn')) {
-        // Tải chi tiết nhân viên để sửa (Gọi showDetailCard với mode 'edit')
-        showDetailCard('edit', staffId); 
-    } else if (target.classList.contains('delete-staff-btn')) {
-        // Xóa nhân viên
-        handleDeleteStaff(staffId);
-    }
-});
-
-// Lắng nghe nút THÊM NHÂN VIÊN MỚI
-if (addStaffButton) {
-    addStaffButton.addEventListener('click', () => {
-        // Chuyển sang chế độ Thêm Mới
-        showDetailCard('add'); 
-    });
-}
-
-// Lắng nghe sự kiện Lưu/Submit form CHUNG
-if (staffUnifiedForm) {
-    staffUnifiedForm.addEventListener('submit', handleSaveStaff);
-}
-
-// Lắng nghe nút HỦY (thoát form)
-if (cancelStaffButton) {
-    cancelStaffButton.addEventListener('click', hideDetailCard);
-}
-
-
-// Chạy khi trang load
-document.addEventListener('DOMContentLoaded', () => {
+    modal.close();
     fetchStaffList();
-    // Ẩn form chi tiết khi khởi tạo (mặc định)
-    staffDetailCard.style.display = 'none'; 
 });
+
+// =========================================
+// NÚT HỦY
+// =========================================
+
+cancelBtn.addEventListener("click", () => modal.close());
+
+// =========================================
+// XÓA NHÂN VIÊN
+// =========================================
+
+document.addEventListener("click", async (e) => {
+    if (!e.target.classList.contains("delete-staff-btn")) return;
+
+    if (!confirm("Bạn có chắc muốn xoá nhân viên này?")) return;
+
+    const id = e.target.dataset.id;
+
+    await supabaseClient.from("super_users").delete().eq("id", id);
+
+    fetchStaffList();
+});
+
+// =========================================
+// KHỞI TẠO
+// =========================================
+
+document.addEventListener("DOMContentLoaded", fetchStaffList);

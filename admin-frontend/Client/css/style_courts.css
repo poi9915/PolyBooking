@@ -1,12 +1,24 @@
 /* Styles RIÊNG cho trang Quản lý Sân & Giá */
-
+.management-grid {
+    display: block; /* Đảm bảo 1 cột duy nhất */
+    margin-top: 20px;
+}
+.venue-list-card,
+.court-list-card { 
+    width: 100%; 
+}
+#court-edit-card, /* Giữ nếu bạn vẫn dùng ID này cho form cũ */
+#court-crud-card, 
+#venue-crud-card { 
+    display: none !important; 
+}
 /* Layout Grid Specifics*/
 .field-list-card { 
-    grid-column: 1 / 2; 
+    grid-column: 1 / -1; 
 } 
 
 .pricing-card { 
-    grid-column: 2 / 3; 
+    grid-column: 1 / -1; 
 } 
 
 /* Form & Element Specifics (từ inline <style> trong court.html)*/
@@ -157,3 +169,92 @@
     position: relative;
     z-index: 100; /* Đảm bảo nút này nằm trên cùng */
 }
+.action-buttons { display: flex; gap: 8px; justify-content: center; }
+.edit-venue-btn   { background: #007bff; color: white; padding: 6px 12px; border: none; border-radius: 6px; font-size: 13px; }
+.delete-venue-btn { background: #dc3545; color: white; padding: 6px 12px; border: none; border-radius: 6px; font-size: 13px; }
+.edit-venue-btn:hover   { background: #0069d9; }
+.delete-venue-btn:hover { background: #c82333; }
+/* NỀN MỜ */
+.staff-modal::backdrop {
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(3px);
+}
+
+/* HỘP MODAL – CĂN GIỮA MÀN HÌNH */
+.staff-modal {
+    position: fixed !important;        /* ⬅️ BẮT BUỘC CÓ */
+    top: 50% !important;               /* ⬅️ BẮT BUỘC CÓ */
+    left: 50% !important;              /* ⬅️ BẮT BUỘC CÓ */
+    transform: translate(-50%, -50%) !important; /* ⬅️ BẮT BUỘC CÓ */
+
+    width: 1500px;
+    max-width: 90vw;
+    padding: 30px;
+    border: none;
+    border-radius: 12px;
+    background: #fff;
+
+    box-shadow: 0px 10px 40px rgba(0, 0, 0, 0.25);
+
+    animation: fadeIn 0.2s ease-out;
+    z-index: 99999; /* đảm bảo nổi lên trên */
+}
+
+/* Form trong modal */
+#staff-modal-form .form-group {
+    margin-bottom: 12px;
+}
+
+#staff-modal-form input,
+#staff-modal-form select {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+}
+
+#staff-modal-form label {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    display: block;
+}
+
+/* Tiêu đề */
+#staff-modal-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+/* Nút */
+.staff-modal menu {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+/* Nút */
+.save-button {
+    background-color: #2ecc71 !important;
+    border: none;
+    padding: 10px 16px;
+    color: white;
+    border-radius: 6px;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.save-button:hover {
+    background-color: #27ae60 !important;
+}
+
+
+/* Hiệu ứng mở modal */
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+

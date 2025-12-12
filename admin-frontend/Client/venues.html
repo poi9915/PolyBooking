@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Khu Vực</title>
+    <link rel="stylesheet" href="/Client/css/style_base.css">
+    <link rel="stylesheet" href="/Client/css/style_courts.css">
+    <style>
+        /* Thêm style cho thẻ img và trạng thái */
+        .image-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .image-preview img {
+            max-width: 100px;
+            max-height: 100px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
+        .status-active {
+            color: green;
+            font-weight: bold;
+        }
+
+        .status-maintenance {
+            color: orange;
+            font-weight: bold;
+        }
+
+        /* Ẩn form chi tiết khi mới load */
+        /* Giữ lại style này nếu bạn muốn ẩn form chi tiết Sân (Court) nếu nó xuất hiện */
+        #court-edit-card {
+            display: none;
+        }
+
+        /* Thêm CSS cho nhóm input và nút xóa */
+        .input-group-with-clear {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .clear-image-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            white-space: nowrap;
+        }
+
+        .clear-image-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        /* Tối ưu layout cho trang Venue chỉ có 1 cột */
+        .management-grid {
+            display: block;
+            /* Chuyển về bố cục một cột */
+        }
+
+        .field-list-card,
+        .pricing-card {
+            grid-column: unset !important;
+            /* Bỏ qua định nghĩa cột cũ */
+        }
+
+        /* FIX Z-INDEX STACKING ISSUE */
+        #venue-modal-overlay {
+            z-index: 1000 !important;
+            /* Giữ z-index mặc định */
+        }
+
+        #court-modal-overlay {
+            z-index: 2000 !important;
+            /* Đảm bảo Modal Sân luôn nằm trên Venue Modal */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+
+        <div id="sidebar-placeholder"></div>
+
+        <div class="main-content-area">
+
+            <header class="top-header">
+                <div class="page-title">
+                    <h1>Quản lý Khu Vực</h1>
+                    <p>Cập nhật thông tin chi tiết về các khu vực.</p>
+                </div>
+                <div class="user-profile">
+                    <div class="profile-avatar">Admin</div>
+                </div>
+            </header>
+
+            <div class="management-grid">
+
+                <section class="card field-list-card">
+                    <h3>Danh sách các Khu Vực</h3>
+                    <button class="add-button" id="add-venue-button"> Thêm Khu Vực Mới</button>
+
+                    <div class="table-responsive">
+                        <table class="data-table field-table" id="venues-list-table">
+                            <thead>
+                                <tr data-id="${venue.id}" class="venue-row selectable-row">
+                                    <th>Tên Khu Vực</th>
+                                    <th>Địa chỉ</th>
+                                    <th>Thành phố</th>
+                                    <th>Bề mặt</th>
+                                    <th>SĐT</th>
+                                    <th>Email</th>
+                                    <th>Trong nhà/Ngoài trời</th>
+                                    <th>Rating</th>
+                                    <th>Hình ảnh</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="venues-list-tbody">
+                                <tr>
+                                    <td colspan="12">Đang tải danh sách khu vực...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+    <!-- ===================== VENUE MODAL (dialog) ===================== -->
+<dialog id="venue-modal" class="staff-modal">
+    <form method="dialog" id="venue-modal-form">
+
+        <h3 id="venue-modal-title">Chi tiết Khu Vực</h3>
+
+        <fieldset id="venue-details-fieldset">
+            <legend>Chi tiết Khu Vực</legend>
+
+            <div class="form-group">
+                <label for="venue-name">Tên Khu Vực:</label>
+                <input type="text" id="venue-name">
+            </div>
+
+            <div class="form-group">
+                <label for="venue-address">Địa chỉ:</label>
+                <input type="text" id="venue-address">
+            </div>
+
+            <div class="form-group">
+                <label for="venue-country">Tỉnh/Thành phố:</label>
+                <input type="text" id="venue-country">
+            </div>
+
+            <div class="form-group">
+                <label for="venue-surface">Loại Sân:</label>
+                <input type="text" id="venue-surface">
+            </div>
+
+            <div class="form-group">
+                <label for="venue-is-indoor">Trong Nhà:</label>
+                <select id="venue-is-indoor">
+                    <option value="true">Có</option>
+                    <option value="false">Không</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="venue-contact-email">Email:</label>
+                <input type="email" id="venue-contact-email">
+            </div>
+
+            <div class="form-group">
+                <label for="venue-contact-phone">SĐT:</label>
+                <input type="tel" id="venue-contact-phone">
+            </div>
+
+            <div class="form-group">
+                <label>Ảnh khu vực:</label>
+                <input type="file" id="venue-image-upload" accept="image/*" multiple>
+                <div id="venue-images-preview" class="image-preview"></div>
+            </div>
+        </fieldset>
+
+        <section class="card" id="court-list-in-modal-card" style="margin-top:20px; display:none;">
+            
+                <button id="add-court-to-venue-btn" class="add-button" style="margin-left:10px; display:none;">
+                    + Thêm Sân
+                </button>
+            
+
+            <div class="table-responsive">
+                <table class="data-table field-table">
+                    <thead>
+                        <tr>
+                            <th>Tên Sân</th>
+                            <th>Sức chứa</th>
+                            <th>Giá</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="courts-by-venue-tbody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <menu>
+            <button type="button" id="save-venue-details-btn" class="save-button">Lưu</button>
+            <button type="button" class="action-btn" onclick="closeVenueModal()">Hủy</button>
+        </menu>
+    </form>
+</dialog>
+
+<!-- ===================== COURT MODAL (dialog) ===================== -->
+<dialog id="court-modal" class="staff-modal">
+    <form method="dialog" id="court-modal-form">
+        <h3 id="court-modal-title">Thêm Sân</h3>
+
+        <input type="hidden" id="current-court-id">
+        <input type="hidden" id="court-venue-id">
+
+        <div class="form-group">
+            <label for="court-name">Tên Sân:</label>
+            <input type="text" id="court-name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="court-code">Mã Sân:</label>
+            <input type="text" id="court-code" required>
+        </div>
+
+        <div class="form-group">
+            <label for="court-capacity">Sức chứa:</label>
+            <select id="court-capacity">
+                <option value="2">2 người</option>
+                <option value="4">4 người</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="court-price">Giá/giờ:</label>
+            <input type="number" id="court-price" required>
+        </div>
+
+        <div class="form-group">
+            <label for="court-is-active">Trạng thái:</label>
+            <select id="court-is-active">
+                <option value="true">Hoạt động</option>
+                <option value="false">Bảo trì</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Ảnh sân:</label>
+            <input type="file" id="court-image-upload" accept="image/*" multiple>
+            <div id="court-images-preview" class="image-preview"></div>
+        </div>
+
+        <menu>
+            <button type="button" id="save-court-details-btn" class="save-button">Lưu</button>
+            <button type="button" class="action-btn" onclick="closeCourtModal()">Hủy</button>
+        </menu>
+    </form>
+</dialog>
+
+</body>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/Client/js/client_config.js"></script>
+<script src="/Client/js/court_utils.js"></script>
+<script src="/Client/js/venues_logic.js"></script>
+<script src="/Client/js/venues_main.js"></script>
+<script src="/Client/js/loadSliderBar.js"></script>
+</body>
+
+</html>

@@ -6,6 +6,11 @@ function setupCourtForm(mode = 'add', data = null) { // data là Court object
     const saveButton = document.getElementById('save-court-details-btn');
     const venueFieldset = document.getElementById('venue-details-fieldset');
     const courtFieldset = document.getElementById('court-details-fieldset');
+    // 🛑 Thêm kiểm tra Null cho các phần tử chính của form Court
+    if (!title || !saveButton || !courtFieldset) {
+        // Nếu form Court không tồn tại (vì đang ở trang Venue), thoát
+        return; 
+    }
 
     currentCourtId = (mode === 'edit' && data) ? data.id : null;
 
@@ -98,13 +103,27 @@ async function loadCourtDetails(courtId) {
 // ===================================================================
 // TẢI VÀ RENDER DANH SÁCH SÂN
 // ===================================================================
-async function fetchCourtsList() {
-    const { data: courts, error } = await supabaseClient
+// /Client/js/courts_logic.js
+
+// ===================================================================
+// TẢI VÀ RENDER DANH SÁCH SÂN (CÓ THÊM BỘ LỌC)
+// ===================================================================
+async function fetchCourtsList(venueId = null) { // 🚨 THÊM THAM SỐ venueId
+    // 1. Khởi tạo truy vấn
+    let query = supabaseClient
         .from('courts')
         .select(`
             id, name, code, capacity, default_price_per_hour, is_active, image_url, 
             venues (id, name, address, surface, is_indoor, province) 
         `);
+
+    // 2. Áp dụng bộ lọc Venue ID
+    if (venueId) {
+        query = query.eq('venue_id', venueId);
+    }
+    
+    // 3. Thực thi truy vấn
+    const { data: courts, error } = await query;
 
     if (error) {
         console.error("Lỗi khi tải danh sách sân:", error.message);
@@ -120,6 +139,10 @@ async function fetchCourtsList() {
 function renderCourtsList(courts) {
     const tbody = document.getElementById('courts-list-tbody');
     tbody.innerHTML = '';
+    if (!tbody) {
+        // Nếu không có bảng sân trên trang (ví dụ: đang ở trang Venue), thoát
+        return; 
+    }
 
     if (!courts || courts.length === 0) {
         tbody.innerHTML = '<tr><td colspan="8">Chưa có sân nào được tạo.</td></tr>';

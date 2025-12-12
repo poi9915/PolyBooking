@@ -1,16 +1,16 @@
 /* staff.css – ĐẸP Y HỆT COURT.HTML */
 .management-grid {
     display: grid !important;
-    grid-template-columns: 2fr 1fr !important;
+    grid-template-columns:  1fr !important;
     gap: 30px;
     margin-top: 20px;
 }
 
-.staff-list-card   { grid-column: 1 / 2; }
-.staff-edit-card   { grid-column: 2 / 3; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); min-height: 80vh; }
+.staff-list-card   { grid-column: 1 / -1; }
+.staff-edit-card   {display: none; }    
 
 #add-staff-card,
-#staff-detail-card { display: none; }
+#staff-detail-card { display: none !important; }
 
 #add-staff-card.active,
 #staff-detail-card.active { display: block !important; }
@@ -19,9 +19,10 @@
 .staff-table tbody tr:hover { background: #f0f7ff; cursor: pointer; }
 
 .action-buttons { display: flex; gap: 8px; justify-content: center; }
-.edit-btn   { background: #007bff; color: white; padding: 6px 12px; border: none; border-radius: 6px; font-size: 13px; }
-.delete-btn { background: #dc3545; color: white; padding: 6px 12px; border: none; border-radius: 6px; font-size: 13px; }
-
+.edit-staff-btn   { background: #007bff; color: white; padding: 6px 12px; border: none; border-radius: 6px; font-size: 13px; }
+.delete-staff-btn { background: #dc3545; color: white; padding: 6px 12px; border: none; border-radius: 6px; font-size: 13px; }
+.edit-staff-btn:hover   { background: #0069d9; }
+.delete-staff-btn:hover { background: #c82333; }
 /* Form đẹp */
 #new-staff-form input,
 #edit-staff-form input,
@@ -97,11 +98,7 @@
     font-weight: 600;
 }
 
-.data-table .edit-btn   { background: #007bff; color: white; }
-.data-table .delete-btn { background: #dc3545; color: white; }
 
-.data-table .edit-btn:hover   { background: #0056b3; }
-.data-table .delete-btn:hover { background: #c82333; }
 
 /* Responsive bảng khi màn hình nhỏ */
 @media (max-width: 992px) {
@@ -131,4 +128,98 @@
         text-align: left;
         color: #555;
     }
+}
+/* NỀN MỜ */
+.staff-modal::backdrop {
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(3px);
+}
+
+/* HỘP MODAL – CĂN GIỮA MÀN HÌNH */
+.staff-modal {
+    position: fixed !important;        /* ⬅️ BẮT BUỘC CÓ */
+    top: 50% !important;               /* ⬅️ BẮT BUỘC CÓ */
+    left: 50% !important;              /* ⬅️ BẮT BUỘC CÓ */
+    transform: translate(-50%, -50%) !important; /* ⬅️ BẮT BUỘC CÓ */
+
+    width: 1500px;
+    max-width: 90vw;
+    padding: 25px;
+    border: none;
+    border-radius: 12px;
+    background: #fff;
+
+    box-shadow: 0px 10px 40px rgba(0, 0, 0, 0.25);
+
+    animation: fadeIn 0.2s ease-out;
+    z-index: 99999; /* đảm bảo nổi lên trên */
+}
+
+/* Form trong modal */
+#staff-modal-form .form-group {
+    margin-bottom: 12px;
+}
+
+#staff-modal-form input,
+#staff-modal-form select {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+}
+
+#staff-modal-form label {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    display: block;
+}
+
+/* Tiêu đề */
+#staff-modal-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+/* Nút */
+.staff-modal menu {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+/* Nút */
+.save-button {
+    background-color: #2ecc71 !important;
+    border: none;
+    padding: 10px 16px;
+    color: white;
+    border-radius: 6px;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.save-button:hover {
+    background-color: #27ae60 !important;
+}
+
+.action-btn {
+    background: #e74c3c !important;
+    color: #fff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+}
+
+.action-btn:hover {
+    background: #c0392b !important;
+}
+
+/* Hiệu ứng mở modal */
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
 }

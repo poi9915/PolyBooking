@@ -29,7 +29,6 @@
             <section class="card filter-card">
                 <div class="filter-controls">
 
-                    <!-- CHỌN KIỂM LỌC -->
                     <div class="form-group filter-group">
                         <label for="filter-type">Lọc theo:</label>
                         <select id="filter-type">
@@ -40,29 +39,34 @@
                         </select>
                     </div>
 
-                    <!-- LỌC NGÀY -->
-                    <div class="form-group filter-group hidden" id="filter-date">
-                        <label>Chọn ngày:</label>
-                        <input type="date" id="date-from">
-                        <input type="date" id="date-to">
+                    <div class="form-group filter-group">
+                        <label for="filter-venue">Khu vực:</label>
+                        <select id="filter-venue">
+                            <option value="all">Tất cả</option>
+                        </select>
                     </div>
 
-                    <!-- LỌC TUẦN -->
+                    <div class="form-group filter-group hidden date-group" id="filter-date">
+                        <label>Chọn ngày:</label>
+                        <div class="date-range-inputs">
+                            <input type="date" id="date-from">
+                            <input type="date" id="date-to">
+                        </div>
+                    </div>
+
                     <div class="form-group filter-group hidden" id="filter-week">
-                        <label>Chọn tuần:</label>
+                        <label for="week-select">Chọn tuần:</label>
                         <input type="week" id="week-select">
                     </div>
 
-                    <!-- LỌC THÁNG -->
                     <div class="form-group filter-group hidden" id="filter-month">
-                        <label>Chọn tháng:</label>
+                        <label for="month-select">Chọn tháng:</label>
                         <input type="month" id="month-select">
                     </div>
 
                     <button class="action-btn primary-btn" id="btn-refresh">Lọc</button>
                 </div>
             </section>
-
 
             <!-- KPI -->
             <section class="kpi-container summary-kpi">
@@ -83,6 +87,17 @@
                         <div class="kpi-subtext">Tính từ dữ liệu booking</div>
                     </div>
                 </div>
+                <!-- ⭐ THÊM MỚI: Tổng đơn thành công -->
+                <div class="kpi-card success-kpi">
+                    <span class="kpi-icon"></span>
+                    <div>
+                        <div class="kpi-title">Đơn Thành Công</div>
+                        <div class="kpi-value" id="total-success">0</div>
+                        <div class="kpi-subtext">Đơn có trạng thái "hoàn thành"</div>
+                    </div>
+                </div>
+
+
             </section>
 
             <!-- BẢNG DỮ LIỆU CHI TIẾT -->
@@ -94,23 +109,28 @@
                         <thead>
                             <tr>
                                 <th>Mã Đơn</th>
+                                <th>Email</th>
+                                <th>Trạng thái</th>
+                                <th>Khu vực</th>
                                 <th>Ngày tạo</th>
                                 <th>Giờ bắt đầu</th>
                                 <th>Giờ kết thúc</th>
                                 <th>Số giờ</th>
-                                <th>Giá</th>
+                                <th>Thành tiền</th>
                             </tr>
                         </thead>
 
                         <!-- Bổ sung đúng ID để render từ JS -->
                         <tbody id="table-body">
                             <tr>
-                                <td colspan="6" style="text-align: center;">Đang tải dữ liệu...</td>
+                                <td colspan="9" style="text-align: center;">Đang tải dữ liệu...</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </section>
+            <div id="week-label" class="sub-label"></div>
+            <div id="month-label" class="sub-label"></div>
 
         </div>
     </div>

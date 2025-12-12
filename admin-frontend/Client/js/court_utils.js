@@ -3,6 +3,7 @@ let allVenues = [];
 // Biến toàn cục để lưu ID sân đang được chỉnh sửa
 let currentCourtId = null; 
 
+
 // ===================================================================
 // HÀM UPLOAD FILE LÊN SUPABASE STORAGE (ĐÃ FIX LỖI BUCKET VÀ THÊM LOG)
 // ===================================================================
@@ -75,4 +76,65 @@ function renderImagePreview(urlText, previewElementId) {
             previewDiv.appendChild(img);
         }
     });
+}
+// /Client/js/court_utils.js (Bổ sung vào cuối file)
+
+
+function closeVenueModal() {
+    document.getElementById("venue-modal-overlay").classList.remove("active");
+    modalMode = null;
+}
+// /Client/js/court_utils.js (Bổ sung vào cuối file)
+// ... (Hàm openVenueModal và closeVenueModal đã có)
+
+function openVenueModal() {
+    const modal = document.getElementById('venue-modal-overlay');
+    if (!modal) return;
+
+    modal.classList.add("active");
+
+    const venueFieldset = document.getElementById("venue-details-fieldset");
+    const courtList = document.getElementById("court-list-in-modal-card");
+
+    if (modalMode === "addVenue") {
+        venueFieldset.style.display = "block";
+        courtList.style.display = "none";
+    } 
+    else if (modalMode === "editVenue") {
+        venueFieldset.style.display = "block";
+        courtList.style.display = "none";
+    } 
+    else if (modalMode === "viewCourts") {
+        venueFieldset.style.display = "none";
+        courtList.style.display = "block";
+    }
+}
+
+
+
+function closeCourtModal() {
+    const modal = document.getElementById('court-modal-overlay');
+    if (modal) modal.classList.remove('active');
+    
+    // 🛑 BỔ SUNG: ẨN form sửa Sân khi đóng modal Sân
+    const courtEditCard = document.getElementById('court-edit-card');
+    if (courtEditCard) {
+        courtEditCard.style.display = 'none';
+    }
+
+    // Sau khi đóng modal Sân, ta quay lại màn hình quản lý Venue.
+    // Nếu ta đang ở chế độ Sửa Venue, ta cần hiện lại danh sách Sân:
+    const courtListCard = document.getElementById('court-list-in-modal-card');
+    if (courtListCard) {
+        courtListCard.style.display = 'block';
+    }
+}
+function openCourtModal() {
+    const modal = document.getElementById("court-modal-overlay");
+    if (!modal) return;
+
+    modal.classList.add("active");
+
+    // Hiện form chi tiết sân
+    document.getElementById("court-detail-form").style.display = "block";
 }
