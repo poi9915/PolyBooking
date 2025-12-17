@@ -1,0 +1,148 @@
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quản lý Dịch vụ</title>
+    <!-- CSS dùng chung -->
+    <link rel="stylesheet" href="/Client/css/style_base.css" />
+    <link rel="stylesheet" href="/Client/css/service.css" />
+    <!-- Có thể tạo thêm service.css nếu muốn -->
+    <style>
+
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+        <!-- SIDEBAR -->
+        <div id="sidebar-placeholder"></div>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-content-area">
+            <header class="top-header">
+                <div class="page-title">
+                    <h1>Quản lý Dịch vụ</h1>
+                    <p>Quản lý danh sách dịch vụ, khu vực và giá bán</p>
+                </div>
+                <div class="profile-avatar">Admin</div>
+            </header>
+
+            <!-- TOOLBAR: FILTER + ADD -->
+            <section class="card">
+                <div class="toolbar">
+                    <div class="form-group filter-group">
+                        <label for="filter-area">Lọc theo khu vực</label>
+                        <select id="filter-area">
+                            <option value="all">Tất cả khu vực</option>
+                            <option value="A">Khu A</option>
+                            <option value="B">Khu B</option>
+                            <option value="C">Khu C</option>
+                        </select>
+                    </div>
+
+                    <button class="add-button" id="btn-add-service">+ Thêm dịch vụ</button>
+                </div>
+            </section>
+
+            <!-- TABLE -->
+            <section class="card">
+                <h3>Danh sách dịch vụ</h3>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Tên dịch vụ</th>
+                                <th>Khu vực</th>
+                                <th>Số lượng</th>
+                                <th>Đơn giá / 1 SP</th>
+                                <th>Trạng thái</th>
+                                <th>Hoạt động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="service-table-body">
+                            <tr>
+                                <td>1</td>
+                                <td>Nước suối</td>
+                                <td>Khu A</td>
+                                <td>120</td>
+                                <td>10.000 đ</td>
+                                <td class="status-active">Đang bán</td>
+                                <td class="action-icons">
+                                    <button class="action-btn" onclick="editService(1)">Sửa</button>
+                                    <button class="delete-button" onclick="deleteService(1)">Xóa</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>Thuê vợt</td>
+                                <td>Khu B</td>
+                                <td>20</td>
+                                <td>50.000 đ</td>
+                                <td class="status-inactive">Ngừng bán</td>
+                                <td class="action-icons">
+                                    <button class="action-btn" onclick="editService(2)">Sửa</button>
+                                    <button class="delete-button" onclick="deleteService(2)">Xóa</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </div>
+    <dialog id="service-modal" class="staff-modal">
+        <form id="service-form" method="dialog">
+
+            <h3 id="service-modal-title">Thêm dịch vụ</h3>
+
+
+
+            <input type="hidden" id="service-id">
+
+            <div class="form-group">
+                <label>Tên dịch vụ</label>
+                <input type="text" id="service-name" required>
+            </div>
+
+            <div class="form-group">
+                <label>Khu vực</label>
+                <select id="service-venue" required></select>
+            </div>
+
+            <div class="form-group">
+                <label>Số lượng</label>
+                <input type="number" id="service-quantity" min="0" required>
+            </div>
+
+            <div class="form-group">
+                <label>Đơn giá</label>
+                <input type="number" id="service-price" min="0" required>
+            </div>
+
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="service-active">
+                    Đang bán
+                </label>
+            </div>
+
+            <menu>
+                
+                <button type="submit" class="save-button">Lưu</button>
+                <button type="button" class="action-btn" onclick="closeServiceModal()">Hủy</button>
+            </menu>
+
+        </form>
+    </dialog>
+
+
+    <!-- SCRIPT -->
+    <script src="/Client/js/loadSliderBar.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/Client/js/client_config.js"></script>
+    <script src="/Client/js/service.js"></script>
+</body>
+
+</html>
