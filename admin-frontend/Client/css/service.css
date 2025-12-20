@@ -1,0 +1,210 @@
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.toolbar .filter-group {
+    min-width: 200px;
+}
+
+.status-active {
+    color: var(--accent-color);
+    font-weight: 600;
+}
+
+.status-inactive {
+    color: var(--danger-color);
+    font-weight: 600;
+}
+
+.action-icons button {
+    margin-right: 6px;
+}
+
+.card {
+    margin-bottom: 20px;
+}
+/* =============================
+   TABLE FIX – DÙNG CHUNG TOÀN HỆ THỐNG
+   ÁP DỤNG CHO TẤT CẢ CÁC BẢNG
+   ============================= */
+
+/* Wrapper cho table – chịu trách nhiệm scroll */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+/* Table chuẩn – KHÔNG LỆCH CỘT */
+.data-table {
+    width: 100%;
+    min-width: 900px; /* tránh co cột gây lệch */
+    border-collapse: collapse;
+    table-layout: fixed; /* BẮT BUỘC */
+}
+
+/* THEAD + TBODY dùng CHUNG style */
+.data-table th,
+.data-table td {
+    padding: 12px 10px; /* giống nhau để không lệch */
+    text-align: left;
+    vertical-align: middle;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Header */
+.data-table thead th {
+    background-color: var(--primary-color);
+    color: #fff;
+    font-weight: 600;
+}
+
+/* Row hover */
+.data-table tbody tr:hover {
+    background-color: var(--background-color);
+}
+
+/* ❌ NGĂN TOÀN BỘ LỆCH DO CSS SAI */
+.data-table th,
+.data-table td {
+    display: table-cell !important; /* cấm flex */
+}
+
+/* ===== WIDTH CỘT MẶC ĐỊNH (CÓ THỂ OVERRIDE Ở FILE RIÊNG) ===== */
+.data-table th:nth-child(1),
+.data-table td:nth-child(1) { width: 60px; }
+
+.data-table th:nth-child(2),
+.data-table td:nth-child(2) { width: 200px; }
+
+.data-table th:nth-child(3),
+.data-table td:nth-child(3) { width: 140px; }
+
+.data-table th:nth-child(4),
+.data-table td:nth-child(4) { width: 120px; }
+
+.data-table th:nth-child(5),
+.data-table td:nth-child(5) { width: 150px; }
+
+.data-table th:nth-child(6),
+.data-table td:nth-child(6) { width: 120px; }
+
+.data-table th:nth-child(7),
+.data-table td:nth-child(7) { width: 160px; }
+
+/* ===== STATUS DÙNG CHUNG ===== */
+.status-active {
+    color: var(--accent-color);
+    font-weight: 600;
+}
+
+.status-inactive {
+    color: var(--danger-color);
+    font-weight: 600;
+}
+
+/* ===== ACTION BUTTON TRONG TABLE ===== */
+.action-icons button {
+    margin-right: 6px;
+}
+
+/* ===== MOBILE: CHỈ SCROLL – KHÔNG PHÁ LAYOUT ===== */
+@media (max-width: 768px) {
+    .data-table {
+        min-width: 800px;
+    }
+}
+.staff-modal {
+    position: fixed !important;        /* ⬅️ BẮT BUỘC CÓ */
+    top: 50% !important;               /* ⬅️ BẮT BUỘC CÓ */
+    left: 50% !important;              /* ⬅️ BẮT BUỘC CÓ */
+    transform: translate(-50%, -50%) !important; /* ⬅️ BẮT BUỘC CÓ */
+
+    width: 1500px;
+    max-width: 90vw;
+    padding: 25px;
+    border: none;
+    border-radius: 12px;
+    background: #fff;
+
+    box-shadow: 0px 10px 40px rgba(0, 0, 0, 0.25);
+
+    animation: fadeIn 0.2s ease-out;
+    z-index: 99999; /* đảm bảo nổi lên trên */
+}
+
+/* Form trong modal */
+#staff-modal-form .form-group {
+    margin-bottom: 12px;
+}
+
+#staff-modal-form input,
+#staff-modal-form select {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+}
+
+#staff-modal-form label {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    display: block;
+}
+
+/* Tiêu đề */
+#staff-modal-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+/* Nút */
+.staff-modal menu {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+/* Nút */
+.save-button {
+    background-color: #2ecc71 !important;
+    border: none;
+    padding: 10px 16px;
+    color: white;
+    border-radius: 6px;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.save-button:hover {
+    background-color: #27ae60 !important;
+}
+
+.action-btn {
+    
+    color: #fff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+}
+
+.action-btn:hover {
+    background: #0056b3 !important;
+}
+
+/* Hiệu ứng mở modal */
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}

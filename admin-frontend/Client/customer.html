@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Khách hàng</title>
+
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+        <div id="sidebar-placeholder"></div>
+        <div class="main-content-area">
+
+            <header class="top-header">
+                <div class="page-title">
+                    <h1>Quản lý Khách hàng</h1>
+                    <p>Theo dõi thông tin và lịch sử đặt sân của khách hàng.</p>
+                </div>
+                <div class="user-profile">
+                    <div class="profile-avatar">Admin</div>
+                </div>
+            </header>
+            <div class="management-grid">
+                <section class="card customer-list-card">
+                    <h3>Danh Sách Khách Hàng</h3>
+
+                    <!-- <button class="add-button" id="add-customer-button-in-list"> Thêm Khách Hàng Mới</button> -->
+
+                    <div class="table-responsive">
+                        <table class="data-table customer-table">
+                            <thead>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Tên Khách hàng</th>
+                                    <th>SĐT</th>
+                                    <th>Email</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+
+            </div>
+        </div>
+    </div>
+    <!-- LOCK ACCOUNT DIALOG -->
+    <div id="lock-dialog" class="modal-overlay">
+        <div class="modal">
+            <h3>Khóa tài khoản</h3>
+
+            <textarea id="lock-reason-input" placeholder="Nhập lý do khóa tài khoản..." rows="4"></textarea>
+
+            <div class="modal-actions">
+                <button id="confirm-lock-btn" style="background-color: red;color: white;padding: 3px;">Khóa</button>
+                <button style="background-color:#007bff;color: white;padding: 3px;" onclick="closeLockDialog()">Hủy</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/Client/js/client_config.js"></script>
+    <script src="/Client/js/loadSliderBar.js"> </script>
+    <link rel="stylesheet" href="/Client/css/style_base.css">
+    <link rel="stylesheet" href="/Client/css/customer.css">
+    <script src="/Client/js/customer.js"> </script>
+</body>
+
+</html>

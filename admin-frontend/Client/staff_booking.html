@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giao diện Nhân viên - Đặt Sân</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/Client/css/style_staff.css">
+</head>
+
+<body>
+    <div class="staff-wrapper">
+
+        <!-- ====================== HEADER ======================= -->
+        <header class="staff-header">
+            <div class="header-left">
+                <h2 id="main-title"> Quản lý Đặt Sân</h2>
+            </div>
+            <nav class="staff-nav">
+                <a id="nav-booking" class="nav-item active" data-content="booking-content">Đặt Sân</a>
+                <a id="nav-schedule" class="nav-item" data-content="schedule-content">Lịch Ca</a>
+                <a id="nav-notification" class="nav-item" data-content="notification-content">Thông báo</a>
+            </nav>
+            <div class="profile-info">
+                <span class="user-name" id="userName"></span>
+                <span class="logout-btn" id="logoutBtn">Đăng xuất</span>
+            </div>
+        </header>
+
+        <!-- ====================== MAIN CONTENT ======================= -->
+        <div class="main-content-staff">
+
+            <!-- ====================== TAB: ĐẶT SÂN ======================= -->
+            <div id="booking-content">
+                <div class="controls-bar">
+                    <div class="filter-group">
+                        <label for="date-select">Ngày:</label>
+                        <input type="date" id="date-select" value="2025-11-25">
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="field-filter">Sân:</label>
+                        <select id="field-filter">
+                            <option value="all">Tất cả</option>
+                        </select>
+                    </div>
+
+                    <button class="btn-primary create-btn"> Tạo Đơn Mới</button>
+                </div>
+
+                <section class="booking-grid-container card">
+                    <h3>Lịch Đặt Sân Hôm Nay</h3>
+                    <div class="booking-grid" id="bookingGrid">
+                        <div class="header-cell">Giờ</div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- ====================== TAB: LỊCH CA ======================= -->
+            <div id="schedule-content">
+                <div class="controls-bar schedule-controls">
+                    <div class="filter-group">
+                        <label for="start-date-select">Ngày Bắt Đầu:</label>
+                        <input type="date" id="start-date-select" value="2025-11-24">
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="end-date-select">Ngày Kết Thúc:</label>
+                        <input type="date" id="end-date-select" value="2025-11-30">
+                    </div>
+
+                    <button class="btn-primary view-schedule-btn">Xem Lịch</button>
+                </div>
+
+                <section class="schedule-table-container card">
+                    <h3>Lịch Làm Việc Của Bạn</h3>
+
+                    <div class="schedule-grid personal-schedule-grid">
+                        <div class="schedule-header-cell employee-col">Ca làm việc</div>
+                        <div class="schedule-header-cell day-col">Thứ Hai (24)</div>
+                        <div class="schedule-header-cell day-col">Thứ Ba (25)</div>
+                        <div class="schedule-header-cell day-col">Thứ Tư (26)</div>
+                        <div class="schedule-header-cell day-col">Thứ Năm (27)</div>
+                        <div class="schedule-header-cell day-col">Thứ Sáu (28)</div>
+                        <div class="schedule-header-cell day-col">Thứ Bảy (29)</div>
+                        <div class="schedule-header-cell day-col">Chủ Nhật (30)</div>
+
+                        <div class="shift-cell"><span class="shift-badge shift-morning">Sáng (8:00 - 12:00)</span></div>
+                        <div class="shift-cell"><span class="shift-badge shift-full">Toàn ca (8:00 - 17:00)</span></div>
+                        <div class="shift-cell"><span class="shift-badge shift-dayoff">Nghỉ</span></div>
+                        <div class="shift-cell"><span class="shift-badge shift-afternoon">Chiều (13:00 - 17:00)</span></div>
+                        <div class="shift-cell"><span class="shift-badge shift-night">Tối (17:00 - 22:00)</span></div>
+                        <div class="shift-cell weekend"><span class="shift-badge shift-full">Toàn ca</span></div>
+                        <div class="shift-cell weekend"><span class="shift-badge shift-dayoff">Nghỉ</span></div>
+                        <div class="shift-cell weekend"><span class="shift-badge shift-dayoff">Nghỉ</span></div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- ====================== TAB: THÔNG BÁO ======================= -->
+            <div id="notification-content">
+                <div class="controls-bar">
+                    <h3 style="margin-right: auto;">Danh sách Thông báo</h3>
+                    <button class="btn-primary mark-all-read-btn">Đánh dấu đã đọc tất cả</button>
+                </div>
+
+                <section class="notification-list-container card">
+                    <div class="notification-list">
+
+                        <div class="notification-item unread" data-type="booking">
+                            <div class="icon-box new-booking"></div>
+                            <div class="notification-details">
+                                <p class="notification-title">Đơn đặt sân mới cần xác nhận</p>
+                                <p class="notification-message">
+                                    Khách hàng <b>Nguyễn Văn A</b> đã đặt Sân B, từ 19:00 - 20:00 (25/11/2025).
+                                </p>
+                                <span class="notification-time">5 phút trước</span>
+                            </div>
+                            <button class="mark-read-btn">Đã đọc</button>
+                        </div>
+
+                        <div class="notification-item unread" data-type="shift">
+                            <div class="icon-box shift-change"></div>
+                            <div class="notification-details">
+                                <p class="notification-title">Ca làm việc có thay đổi</p>
+                                <p class="notification-message">
+                                    Ca Thứ Tư (27/11) đổi từ <b>Sáng</b> sang <b>Chiều</b>.
+                                </p>
+                                <span class="notification-time">1 giờ trước</span>
+                            </div>
+                            <button class="mark-read-btn">Đã đọc</button>
+                        </div>
+
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- ========================= EDIT BOOKING MODAL ========================= -->
+        <div id="editBookingModal" class="modal-overlay" style="display: none;">
+            <div class="modal-content card">
+                <h3> Chi tiết Đơn Đặt Sân</h3>
+
+                <div class="form-section">
+                    <h4>Thông tin Cơ bản</h4>
+                    <div class="form-row">
+                        <div class="form-group half-width">
+                            <label>Mã đơn:</label>
+                            <input type="text" id="edit-booking-id" readonly>
+                        </div>
+
+                        <div class="form-group half-width">
+                            <label>Khách hàng:</label>
+                            <input type="text" id="edit-customer-name">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group half-width">
+                            <label>Ngày:</label>
+                            <input type="date" id="edit-date">
+                        </div>
+
+                        <div class="form-group half-width">
+                            <label for="edit-Khu">Khu:</label>
+                            <select id="edit-Khu"></select>
+                        </div>
+
+                        <div class="form-group half-width">
+                            <label for="edit-field">Sân:</label>
+                            <select id="edit-field"></select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group half-width">
+                            <label>Bắt đầu:</label>
+                            <select id="edit-start-time"></select>
+                        </div>
+
+                        <div class="form-group half-width">
+                            <label>Kết thúc:</label>
+                            <select id="edit-end-time"></select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h4>Thanh toán</h4>
+                    <div class="form-row">
+                        <!-- <div class="form-group half-width">
+                            <label>Trạng thái:</label>
+                            <select id="edit-payment-status">
+                                <option value="pending">Chưa thanh toán</option>
+                                <option value="confirmed">Đã cọc</option>
+                                <option value="paid">Đã thanh toán đủ</option>
+                            </select>
+                        </div> -->
+
+                        <div class="form-group half-width">
+                            <label>Giá sân (VNĐ):</label>
+                            <input type="number" id="edit-price" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn-secondary" id="deleteBookingBtn"> Xóa</button>
+                    <button class="btn-primary" id="saveBookingBtn">Lưu</button>
+                    <button class="btn-secondary" id="closeEditModalBtn">Đóng</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================= NEW BOOKING MODAL ========================= -->
+        <div id="newBookingModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content card">
+        <h3> Tạo Đơn Đặt Sân Mới</h3>
+
+        <!-- THÔNG TIN KHÁCH -->
+        <div class="form-section">
+            <h4>Thông tin Khách</h4>
+            <div class="form-group">
+                <label for="new-customer-name">Tên khách hàng <span class="required">*</span></label>
+                <input type="text" id="new-customer-name">
+            </div>
+        </div>
+
+        <!-- THỜI GIAN & SÂN -->
+        <div class="form-section">
+            <h4>Thời gian & Sân</h4>
+
+            <div class="form-row">
+                <div class="form-group half-width">
+                    <label for="new-date">Ngày đặt</label>
+                    <input type="date" id="new-date" value="2025-11-25">
+                </div>
+
+                <div class="form-group half-width">
+                    <label for="new-Khu">Khu</label>
+                    <select id="new-Khu"></select>
+                </div>
+
+                <div class="form-group half-width">
+                    <label for="new-field">Sân</label>
+                    <select id="new-field"></select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group half-width">
+                    <label for="new-start-time">Bắt đầu</label>
+                    <select id="new-start-time"></select>
+                </div>
+
+                <div class="form-group half-width">
+                    <label for="new-end-time">Kết thúc</label>
+                    <select id="new-end-time"></select>
+                </div>
+            </div>
+        </div>
+
+        <!-- TÍNH TOÁN & THANH TOÁN -->
+        <div class="form-section">
+            <h4>Tính toán & Thanh toán</h4>
+            <div class="calculation-summary">
+                <p>Tổng thời gian đặt: <span class="value-display" id="calculated-duration"></span></p>
+                <p>Đơn giá/sân: <span class="value-display" id="price-per-hour"></span></p>
+                <p>Tổng tiền: <span class="value-display" id="calculated-total"></span></p>
+            </div>
+        </div>
+
+        <!-- GHI CHÚ -->
+        <div class="form-section">
+            <h4>Ghi chú</h4>
+            <textarea id="new-notes" rows="2" placeholder="Ghi chú nội bộ..."></textarea>
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="form-actions">
+            <button class="btn-secondary" id="closeNewModalBtn">Hủy</button>
+            <button class="btn-primary" id="submitNewBookingBtn">Xác nhận đặt sân</button>
+        </div>
+    </div>
+</div>
+
+
+    </div>
+
+    <!-- Menu logic -->
+    <script>
+        function showContent(contentId, title) {
+            document.getElementById('booking-content').style.display = 'none';
+            document.getElementById('schedule-content').style.display = 'none';
+            document.getElementById('notification-content').style.display = 'none';
+
+            document.getElementById(contentId).style.display = 'block';
+            document.getElementById('main-title').innerText = title;
+
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            document.querySelector(`[data-content="${contentId}"]`).classList.add('active');
+        }
+
+        document.getElementById('nav-booking').onclick = () =>
+            showContent('booking-content', ' Quản lý Đặt Sân');
+
+        document.getElementById('nav-schedule').onclick = () =>
+            showContent('schedule-content', ' Lịch Ca Làm');
+
+        document.getElementById('nav-notification').onclick = () =>
+            showContent('notification-content', ' Thông báo');
+
+        showContent('booking-content', ' Quản lý Đặt Sân');
+    </script>
+
+    <!-- Supabase SDK -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2.39.6/dist/umd/supabase.js"></script>
+
+    <!-- Main JS -->
+    <script src="./js/supabase-booking.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>
