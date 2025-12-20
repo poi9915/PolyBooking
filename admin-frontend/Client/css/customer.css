@@ -136,3 +136,67 @@
         color: #555;
     }
 }
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal {
+    background: #fff;
+    padding: 20px;
+    width: 400px;
+    border-radius: 8px;
+}
+
+.modal textarea {
+    width: 100%;
+    margin-top: 10px;
+    padding: 8px 12px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+button.danger {
+    background: #007bff;
+    color: #fff;
+}
+
+.unlock-btn {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.unlock-btn:hover {
+    background: #0069d9;
+}
+.lock-btn {
+    background: #e53935;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+.lock-btn:hover {
+    background: #df222f;
+}

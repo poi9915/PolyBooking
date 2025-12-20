@@ -11,8 +11,8 @@ async function handleDeleteVenueWithConfirmation(venueId, venueName) {
     if (!venueId) return;
 
     const confirmMessage =
-        `❓ BẠN CÓ CHẮC CHẮN MUỐN XÓA Khu Vực "${venueName}" không?\n\n` +
-        `⚠️ Thao tác này sẽ xóa VĨNH VIỄN Khu Vực này và TẤT CẢ SÂN thuộc khu vực đó.`;
+        ` BẠN CÓ CHẮC CHẮN MUỐN XÓA Khu Vực "${venueName}" không?\n\n` +
+        ` Thao tác này sẽ xóa VĨNH VIỄN Khu Vực này và TẤT CẢ SÂN thuộc khu vực đó.`;
 
     // Sử dụng hộp thoại confirm mặc định của trình duyệt
     if (confirm(confirmMessage)) {
@@ -24,20 +24,26 @@ async function handleDeleteVenueWithConfirmation(venueId, venueName) {
  * Reset / sạch form Venue khi mở chế độ Thêm Khu Vực
  */
 function resetVenueForm() {
-    const title = document.getElementById('venue-modal-title');
-    const fieldset = document.getElementById('venue-details-fieldset');
-    const courts = document.getElementById('court-list-in-modal-card');
-
     currentVenueId = null;
     modalMode = "addVenue";
 
-    title.textContent = "Thêm Khu Vực Mới";
+    // RESET FORM
+    document.getElementById('venue-modal-form').reset();
 
-    fieldset.style.display = "block";
-    courts.style.display = "none";
+    // RESET TITLE + BUTTON
+    document.getElementById('venue-modal-title').textContent = "Thêm Khu Vực Mới";
+    document.getElementById('save-venue-details-btn').textContent = "Tạo Khu Vực";
 
-    document.getElementById('save-venue-details-btn').style.display = "inline-block";
+    // RESET UI
+    document.getElementById('venue-details-fieldset').style.display = "block";
+    document.getElementById('court-list-in-modal-card').style.display = "none";
+
+    // RESET ẢNH
+    const preview = document.getElementById('venue-images-preview');
+    preview.innerHTML = '';
+    preview.dataset.currentUrls = '';
 }
+
 
 
 
@@ -62,8 +68,6 @@ document.addEventListener('DOMContentLoaded', () => {
             openVenueModal();
         });
     }
-
-    // 2. LẮNG NGHE SỰ KIỆN CLICK TRÊN BẢNG VENUE (Sửa/Xóa)
     // 2. LẮNG NGHE SỰ KIỆN CLICK TRÊN BẢNG VENUE (Mở Modal Sửa/Xóa)
     if (venuesListTBody) {
         venuesListTBody.addEventListener('click', (e) => {
@@ -86,11 +90,18 @@ document.addEventListener('DOMContentLoaded', () => {
             // ==============================
             if (target.classList.contains('edit-venue-btn')) {
                 e.stopPropagation();
+
                 modalMode = "editVenue";
+                currentVenueId = venueId; //  FIX CỰC QUAN TRỌNG
+
+                document.getElementById('venue-modal-title').textContent = "Chỉnh Sửa Khu Vực";
+                document.getElementById('save-venue-details-btn').textContent = "Lưu Thay Đổi";
+
                 openVenueModal();
                 loadVenueForEdit(venueId);
                 return;
             }
+
 
 
             // ==============================
@@ -195,8 +206,11 @@ async function handleSaveVenue(e) {
     e.preventDefault();
 
     const saveButton = document.getElementById('save-venue-details-btn');
+    const venueCode = document.getElementById('venue-code').value.trim();
+    const isEditMode = modalMode === "editVenue";
 
-    // 🛑 BƯỚC FIX LỖI: Kiểm tra xem nút có tồn tại không
+
+    //  BƯỚC FIX LỖI: Kiểm tra xem nút có tồn tại không
     if (!saveButton) {
         console.error("Lỗi: Nút Lưu Khu Vực (ID: save-venue-details-btn) không tìm thấy.");
         return;
@@ -211,6 +225,7 @@ async function handleSaveVenue(e) {
         // 1. CHUẨN BỊ DỮ LIỆU
         const venueData = {
             name: venueName,
+            code_venues: venueCode,
             address: document.getElementById('venue-address').value.trim(),
             province: document.getElementById('venue-country').value.trim(),
             surface: document.getElementById('venue-surface').value.trim(),
@@ -232,7 +247,7 @@ async function handleSaveVenue(e) {
 
         if (imageInput.files && imageInput.files.length > 0) {
             // Giả định hàm uploadFilesToSupabase có sẵn trong court_utils.js
-            const uploadedUrls = await uploadFilesToSupabase(imageInput.files, 'venue_images/');
+            const uploadedUrls = await uploadFilesToSupabase(imageInput.files, 'venues/');
             if (uploadedUrls) {
                 newImageUrls = uploadedUrls;
             }
@@ -270,7 +285,7 @@ async function handleSaveVenue(e) {
         }
 
         // 4. THÀNH CÔNG VÀ RESET
-        alert(`✅ Khu Vực "${venueName}" đã được ${currentVenueId ? 'cập nhật' : 'tạo mới'} thành công!`);
+        alert(` Khu Vực "${venueName}" đã được ${currentVenueId ? 'cập nhật' : 'tạo mới'} thành công!`);
 
         closeVenueModal();
 
@@ -279,12 +294,12 @@ async function handleSaveVenue(e) {
 
     } catch (error) {
         console.error("Lỗi khi Lưu/Cập nhật Khu Vực:", error.message);
-        alert(`❌ Lỗi khi Lưu Khu Vực: ${error.message}`);
+        alert(` Lỗi khi Lưu Khu Vực: ${error.message}`);
     } finally {
-        // 🛑 BƯỚC FIX LỖI: Kiểm tra lại trong finally
+        //  BƯỚC FIX LỖI: Kiểm tra lại trong finally
         if (saveButton) {
             saveButton.disabled = false;
-            saveButton.textContent = currentVenueId ? 'Lưu Thay Đổi' : 'Tạo Khu Vực';
+            saveButton.textContent = isEditMode ? 'Lưu Thay Đổi' : 'Tạo Khu Vực';
         }
     }
 
@@ -361,7 +376,7 @@ async function handleSaveCourt(e) {
         }
 
         // 4. THÀNH CÔNG VÀ RESET
-        alert(`✅ Sân "${courtName}" đã được ${isUpdate ? 'cập nhật' : 'tạo mới'} thành công!`);
+        alert(` Sân "${courtName}" đã được ${isUpdate ? 'cập nhật' : 'tạo mới'} thành công!`);
 
         closeCourtModal();
 
@@ -370,7 +385,7 @@ async function handleSaveCourt(e) {
 
     } catch (error) {
         console.error("Lỗi khi Lưu/Cập nhật Sân:", error.message);
-        alert(`❌ Lỗi khi Lưu Sân: ${error.message}`);
+        alert(` Lỗi khi Lưu Sân: ${error.message}`);
     } finally {
         saveButton.disabled = false;
         saveButton.textContent = isUpdate ? 'Lưu Thay Đổi' : 'Tạo Sân';

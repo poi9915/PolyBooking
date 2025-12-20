@@ -4,7 +4,7 @@
    Bảng: services
    ============================= */
 
-// ⚠️ YÊU CẦU: client_config.js đã export supabaseClient
+//  YÊU CẦU: client_config.js đã export supabaseClient
 // const supabaseClient = supabase.createClient(URL, KEY)
 
 const tableBody = document.getElementById('service-table-body');

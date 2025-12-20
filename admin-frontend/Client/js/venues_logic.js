@@ -70,11 +70,6 @@ async function deleteVenueAndCourts(venueId) {
             await loadVenuesForSelect();
         }
 
-        // Tải lại danh sách courts (nếu bạn có bảng courts chính)
-        if (typeof fetchCourtsList === 'function') {
-            await fetchCourtsList();
-        }
-
         // Reset các trạng thái UI liên quan
         currentVenueId = null;
         // Ẩn modal nếu còn mở
@@ -133,7 +128,7 @@ async function loadVenuesForSelect() {
     select.appendChild(newOption);
 }
 
-// ⚠️ Nếu bạn có một hàm khác tên là fetchAndRenderVenues để render bảng Venue,
+//  Nếu bạn có một hàm khác tên là fetchAndRenderVenues để render bảng Venue,
 // hãy đảm bảo hàm đó có kiểm tra null cho tbody như tôi đã hướng dẫn ở bước trước. 
 
 // ===================================================================
@@ -151,7 +146,6 @@ function loadVenueDetailsToForm(venue) {
     document.getElementById('venue-address').value = '';
     document.getElementById('venue-country').value = '';
     document.getElementById('venue-surface').value = '';
-   
     document.getElementById('venue-contact-email').value = '';
     document.getElementById('venue-contact-phone').value = '';
 
@@ -164,7 +158,6 @@ function loadVenueDetailsToForm(venue) {
         document.getElementById('venue-address').value = venue.address || '';
         document.getElementById('venue-country').value = venue.province || ''; // Dùng province cho hiển thị
         document.getElementById('venue-surface').value = venue.surface || '';
-        
         document.getElementById('venue-contact-email').value = venue.contact_email || '';
         document.getElementById('venue-contact-phone').value = venue.contact_phone || '';
 
@@ -199,7 +192,7 @@ function loadVenueDetailsToForm(venue) {
 async function loadVenues() {
     const { data: venues, error } = await supabaseClient
         .from('venues')
-        .select('id, name, address, province, surface, contact_email, contact_phone, images, rating'); // Bổ sung các trường cần thiết
+        .select('id, name, code_venues, address, province, surface, contact_email, contact_phone, images, rating'); // Bổ sung các trường cần thiết
 
     if (error) {
         console.error("Lỗi khi tải danh sách Khu vực (Bảng):", error.message);
@@ -245,6 +238,7 @@ function renderVenuesList(venues) {
         const row = `
             <tr data-id="${venue.id}">
                 <td>${venue.name || 'N/A'}</td>
+                <td>${venue.code_venues || 'N/A'}</td>
                 <td>${venue.address || 'N/A'}</td>
                 <td>${venue.province || 'N/A'}</td>
                 <td>${venue.surface || 'N/A'}</td>
@@ -266,23 +260,19 @@ function renderVenuesList(venues) {
 // Cần sửa lại hàm fetchAndRenderVenues để nó nhận danh sách Venue (để tránh gọi API 2 lần)
 // Đổi tên hàm cũ thành renderVenueSelect
 function renderVenueSelect(venues) {
-    // ... nội dung hàm cũ (tải vào select) ...
     const select = document.getElementById('venue-select');
-    // Xóa tất cả option trừ option trống đầu tiên (nếu có)
-    select.innerHTML = '<option value="">--- Chọn Khu Vực ---</option>';
+    if (!select) return; //  FIX CHÍNH XÁC
 
-    venues.forEach(venue => {
+    select.innerHTML = '';
+
+    venues.forEach(v => {
         const option = document.createElement('option');
-        option.value = venue.id;
-        option.textContent = venue.name;
+        option.value = v.id;
+        option.textContent = v.name;
         select.appendChild(option);
     });
-
-    const newOption = document.createElement('option');
-    newOption.value = 'new_venue';
-    newOption.textContent = ' Tạo Khu Vực Mới';
-    select.appendChild(newOption);
 }
+
 
 // Hàm fetchAndRenderVenues cũ đổi tên thành loadVenuesForSelect nếu chỉ muốn tải riêng select
 async function loadVenuesForSelect() {
@@ -422,10 +412,10 @@ async function loadVenueDetails(venueId) {
     }
 
     if (data) {
-        // 🚨 QUAN TRỌNG: Gọi setupVenueForm ở chế độ 'edit'
+        //  QUAN TRỌNG: Gọi setupVenueForm ở chế độ 'edit'
         setupVenueForm('edit', data);
         
-        // 🚨 BƯỚC MỚI: Tải danh sách Sân thuộc Venue này
+        //  BƯỚC MỚI: Tải danh sách Sân thuộc Venue này
         await loadCourtsByVenue(venueId);
     } else {
         alert("Không tìm thấy dữ liệu Khu Vực này.");
@@ -443,12 +433,14 @@ function renderVenuesForMasterList(venues) {
 
     if (venues && venues.length > 0) {
         venues.forEach(venue => {
-            // 🚨 ĐIỂM CỰC KỲ QUAN TRỌNG: Phải có data-id VÀ class="venue-row"
+            //  ĐIỂM CỰC KỲ QUAN TRỌNG: Phải có data-id VÀ class="venue-row"
             const row = `
                 <tr data-id="${venue.id}" class="venue-row selectable-row">
                     <td>${venue.name}</td>
+                    <td>${venue.code_venues || 'N/A'}</td>
                     <td>${venue.address || 'N/A'}</td>
                     <td>${venue.surface || 'N/A'}</td>
+                    
                     <td>
                         <button class="action-btn edit-venue-btn" data-id="${venue.id}">Sửa</button>
                     </td>
@@ -467,14 +459,14 @@ function renderVenuesForMasterList(venues) {
 async function fetchVenuesAndRenderTable() {
     const { data: venues, error } = await supabaseClient
         .from('venues')
-        .select('id, name, address, surface'); // Chỉ lấy các trường cần thiết
+        .select('id, name, code_venues, address, province, surface, contact_email, contact_phone, images, rating'); 
 
     if (error) {
         console.error("Lỗi khi tải danh sách Khu vực:", error.message);
         return;
     }
 
-    renderVenuesForMasterList(venues);
+    renderVenuesList(venues);
 }
 // ===================================================================
 // TẢI DANH SÁCH SÂN THEO VENUE
@@ -566,14 +558,14 @@ async function deleteCourt(courtId, venueId) {
 
         if (error) throw error;
 
-        alert("✅ Đã xóa Sân thành công!");
+        alert(" Đã xóa Sân thành công!");
         
         // Tải lại danh sách Sân trong Modal Venue
         await loadCourtsByVenue(venueId);
 
     } catch (err) {
         console.error("Lỗi khi xóa Sân:", err.message);
-        alert(`❌ Lỗi khi xóa Sân: ${err.message}`);
+        alert(` Lỗi khi xóa Sân: ${err.message}`);
     }
 }
 // /Client/js/venues_logic.js (Bổ sung)
@@ -599,7 +591,7 @@ function setupCourtFormForAdd(venueId) {
     modalTitle.textContent = "Thêm Sân Mới";
     saveButton.textContent = "Tạo Sân";
 
-    // 🛑 FIX: Ẩn danh sách Sân trong Venue Modal khi mở Court Modal
+    //  FIX: Ẩn danh sách Sân trong Venue Modal khi mở Court Modal
     const courtListCard = document.getElementById('court-list-in-modal-card');
     if (courtListCard) courtListCard.style.display = 'none';
 
@@ -667,9 +659,14 @@ async function loadVenueForEdit(venueId) {
 
     modalMode = "editVenue";
 
-    const title = document.getElementById("venue-modal-title");
-    const fieldset = document.getElementById("venue-details-fieldset");
-    const courts = document.getElementById("court-list-in-modal-card");
+    document.getElementById('venue-name').value = data.name || '';
+    document.getElementById('venue-code').value = data.code_venues || '';
+    document.getElementById('venue-address').value = data.address || '';
+    document.getElementById('venue-country').value = data.province || '';
+    document.getElementById('venue-surface').value = data.surface || '';
+    document.getElementById('venue-contact-email').value = data.contact_email || '';
+    document.getElementById('venue-contact-phone').value = data.contact_phone || '';
+    
 
     // title đúng
     title.textContent = "Chỉnh Sửa Khu Vực";
@@ -685,6 +682,7 @@ async function loadVenueForEdit(venueId) {
 
     // Populate form
     document.getElementById('venue-name').value = data.name;
+    document.getElementById('venue-code').value = venue.code_venues || '';
     document.getElementById('venue-address').value = data.address;
     document.getElementById('venue-country').value = data.province;
     document.getElementById('venue-surface').value = data.surface;

@@ -77,7 +77,7 @@ const addStaffCard = document.getElementById('add-staff-card');       // Form Th
 const addStaffButton = document.getElementById('add-staff-button');   // Nút Thêm Nhân Viên Mới
 
 // Lấy phần tử DOM cho Form Thêm Tài khoản
-const staffNameInput = document.getElementById('staff-namenew');     // 🔥 BỔ SUNG: Lấy Input Tên
+const staffNameInput = document.getElementById('staff-namenew');     //  BỔ SUNG: Lấy Input Tên
 const staffEmailInput = document.getElementById('staff-email');
 const staffPasswordInput = document.getElementById('staff-password');
 const staffRoleSelect = document.getElementById('staff-role-new');
@@ -174,7 +174,7 @@ async function loadEmployeeDetails(employeeId) {
 
     // Đổ dữ liệu vào các trường trong Form Sửa (Giả sử Form Sửa có các ID tương ứng)
 
-    // 🔥 LƯU ID VÀO FORM (Dùng để biết bản ghi nào cần cập nhật khi submit)
+    //  LƯU ID VÀO FORM (Dùng để biết bản ghi nào cần cập nhật khi submit)
     document.getElementById('edit-form').dataset.employeeId = data.id;
 
     // Đổ dữ liệu vào các input

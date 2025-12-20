@@ -9,7 +9,7 @@ const customerEditCard = document.getElementById('customer-edit-card');
 const saveButton = document.getElementById('save-customer-details-btn');
 const cancelButton = document.getElementById('cancel-edit-btn');
 const managementGrid = document.querySelector('.management-grid');
-
+let currentLockUserId = null;
 let currentCustomerId = null;
 let isAddingNew = false;
 
@@ -20,26 +20,42 @@ async function fetchAndRenderCustomers() {
     // Chỉ truy vấn các cột cần thiết (id, username, phone, email)
     const { data: customers, error } = await supabaseClient
         .from('profiles')
-        .select('id, username, phone, email') 
+        .select('id, username, phone, email , status , lock_reason')
         .order('id', { ascending: true });
 
     if (error) {
         console.error('Lỗi khi tải khách hàng:', error);
         // Colspan = số cột hiển thị (STT, Tên, SĐT, Email, Thao tác) = 5
-        customerTableBody.innerHTML = '<tr><td colspan="5">Lỗi tải dữ liệu.</td></tr>'; 
+        customerTableBody.innerHTML = '<tr><td colspan="5">Lỗi tải dữ liệu.</td></tr>';
         return;
     }
 
     customerTableBody.innerHTML = '';
-    customers.forEach((customer, index) => { 
+    customers.forEach((customer, index) => {
+        const isActive = customer.status === true;
+
+        const statusText = isActive ? 'Hoạt động' : 'Bị khóa';
+        const statusClass = isActive ? 'status-active' : 'status-inactive';
+
+        const lockActionBtn = isActive
+            ? `<button class="lock-btn" data-id="${customer.id}">Khóa</button>`
+            : `<button class="unlock-btn" data-id="${customer.id}" data-lock-reason="${customer.lock_reason || ''}">Mở khóa</button>`;
+
         const row = customerTableBody.insertRow();
         row.innerHTML = `
-            <td>${index + 1}</td> <td>${customer.username || 'N/A'}</td> 
-            <td>${customer.phone || 'N/A'}</td>    
-            <td>${customer.email || 'N/A'}</td>    
-           
-        `;
+        <td>${index + 1}</td>
+        <td>${customer.username || 'N/A'}</td>
+        <td>${customer.phone || 'N/A'}</td>
+        <td>${customer.email || 'N/A'}</td>
+        <td class="${statusClass}">
+            ${statusText}
+        </td>
+        <td>
+            ${lockActionBtn}
+        </td>
+    `;
     });
+
 }
 
 // ===================================================================
@@ -49,7 +65,7 @@ async function handleSaveCustomer() {
     const nameInput = document.getElementById('customer-name').value;
     const phoneInput = document.getElementById('customer-phone').value;
     const emailInput = document.getElementById('customer-email').value;
-    
+
     // Đã xóa: const totalSpent, const rank
 
     if (!nameInput || !phoneInput || !emailInput) {
@@ -131,14 +147,14 @@ async function showDetailCard(mode = 'add', id = null) {
     document.getElementById('customer-email').value = '';
     // Đã xóa: document.getElementById('customer-total-spent').value = '0';
     // Đã xóa: document.getElementById('customer-rank').value = 'normal';
-    
+
     document.querySelector('#customer-edit-card h3').textContent = isAddingNew ? ' Thêm Khách Hàng Mới' : '📝 Chi Tiết Khách Hàng';
     saveButton.textContent = isAddingNew ? ' Tạo Khách Hàng' : ' Lưu Cập Nhật';
-    
+
     // HIỆN THẺ CHI TIẾT và kích hoạt layout 2 cột
     customerEditCard.style.display = 'block';
     managementGrid.classList.add('detail-visible');
-    
+
     // Nếu là chế độ Cập nhật, tải dữ liệu khách hàng
     if (id && !isAddingNew) {
         // Chỉ truy vấn các cột cần thiết (username, phone, email)
@@ -156,9 +172,9 @@ async function showDetailCard(mode = 'add', id = null) {
         }
 
         // Map tên cột DB mới vào các trường Form
-        document.getElementById('customer-name').value = customer.username || ''; 
-        document.getElementById('customer-phone').value = customer.phone || '';   
-        document.getElementById('customer-email').value = customer.email || '';  
+        document.getElementById('customer-name').value = customer.username || '';
+        document.getElementById('customer-phone').value = customer.phone || '';
+        document.getElementById('customer-email').value = customer.email || '';
         // Đã xóa: document.getElementById('customer-total-spent').value = customer.total_spent || 0;
         // Đã xóa: document.getElementById('customer-rank').value = customer.customer_rank || 'normal';
     }
@@ -187,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (saveButton) {
         saveButton.addEventListener('click', handleSaveCustomer);
     }
-    
+
     // Nút Hủy/Quay lại
     if (cancelButton) {
         cancelButton.addEventListener('click', hideDetailCard);
@@ -196,14 +212,118 @@ document.addEventListener('DOMContentLoaded', () => {
     // Lắng nghe sự kiện click trên bảng (Sửa & Xóa)
     if (customerTableBody) {
         customerTableBody.addEventListener('click', (e) => {
-            const target = e.target;
-            const id = target.dataset.id;
-            
-            if (target.classList.contains('edit-btn')) {
+            const btn = e.target;
+            const id = btn.dataset.id;
+            const lock_reason = btn.dataset.lockReason;
+
+            if (!id) return;
+
+            //  KHÓA
+            if (btn.classList.contains('lock-btn')) {
+                openLockDialog(id);
+                return;
+            }
+
+
+            //  MỞ KHÓA
+            if (btn.classList.contains('unlock-btn')) {
+                unlockCustomer(id, lock_reason);
+                return;
+            }
+
+            //  SỬA
+            if (btn.classList.contains('edit-btn')) {
                 showDetailCard('edit', id);
-            } else if (target.classList.contains('delete-btn')) {
+                return;
+            }
+
+            //  XÓA (nếu sau này có)
+            if (btn.classList.contains('delete-btn')) {
                 handleDeleteCustomer(id);
             }
         });
     }
+    const confirmLockBtn = document.getElementById('confirm-lock-btn');
+    const cancelLockBtn = document.getElementById('cancel-lock-btn');
+
+    if (confirmLockBtn) {
+        confirmLockBtn.addEventListener('click', async () => {
+            const reason = document
+                .getElementById('lock-reason-input')
+                .value
+                .trim();
+
+            if (!reason) {
+                alert('Vui lòng nhập lý do khóa');
+                return;
+            }
+
+            if (!currentLockUserId) {
+                alert('Không xác định được tài khoản');
+                return;
+            }
+
+            await lockCustomer(currentLockUserId, reason);
+            closeLockDialog();
+        });
+    }
+
+    if (cancelLockBtn) {
+        cancelLockBtn.addEventListener('click', closeLockDialog);
+    }
+
+
 });
+async function lockCustomer(id, lock_reason) {
+    const { error } = await supabaseClient
+        .from('profiles')
+        .update({
+            status: false,
+            lock_reason: lock_reason
+        })
+        .eq('id', id);
+
+    if (error) {
+        alert(error.message);
+        return;
+    }
+
+    alert('Đã khóa tài khoản');
+    fetchAndRenderCustomers();
+}
+
+async function unlockCustomer(id, lock_reason) {
+    const ok = confirm(
+        `Bạn có chắc muốn mở khóa tài khoản này?\n\n` +
+        `Lý do bị khóa:\n${lock_reason}`
+    );
+
+    if (!ok) return;
+
+    const { error } = await supabaseClient
+        .from('profiles')
+        .update({
+            status: true,
+            lock_reason: null
+        })
+        .eq('id', id);
+
+    if (error) {
+        alert(error.message);
+        return;
+    }
+
+    alert('Đã mở khóa tài khoản');
+    fetchAndRenderCustomers();
+}
+function openLockDialog(userId) {
+    currentLockUserId = userId;
+    document.getElementById('lock-reason-input').value = '';
+    document.getElementById('lock-dialog').classList.add('active');
+}
+
+function closeLockDialog() {
+    currentLockUserId = null;
+    document.getElementById('lock-dialog').classList.remove('active');
+}
+

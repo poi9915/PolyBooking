@@ -20,7 +20,7 @@ function handleManualRedirect(userRole) {
 }
 
 // -------------------------------------------------------------------
-// 🔥 HÀM MỚI: Lấy vai trò (ROLE) của người dùng từ bảng super_users
+//  HÀM MỚI: Lấy vai trò (ROLE) của người dùng từ bảng super_users
 // -------------------------------------------------------------------
 // async function fetchUserRole(userId) {
 //     // Truy vấn bảng 'super_users' (tên bảng bạn dùng để lưu vai trò)
@@ -52,18 +52,18 @@ function handleManualRedirect(userRole) {
 // }
 
 // -------------------------------------------------------------------
-// 🔥 HÀM SIGN IN : Bắt đầu quá trình lấy vai trò
+//  HÀM SIGN IN : Bắt đầu quá trình lấy vai trò
 // -------------------------------------------------------------------
 // Thay đổi hàm signIn
 async function signIn(email, password) {
     displayMessage('Đang kiểm tra thông tin người dùng...');
     
-    // 🛑 THAY THẾ: TRUY VẤN TRỰC TIẾP BẢNG super_users ĐỂ TÌM EMAIL VÀ MẬT KHẨU
+    //  THAY THẾ: TRUY VẤN TRỰC TIẾP BẢNG super_users ĐỂ TÌM EMAIL VÀ MẬT KHẨU
     const { data: user, error: dbError } = await supabaseClient
         .from('super_users')
         .select(`id, email, role`) // Chỉ lấy các trường cần thiết
         .eq('email', email)
-        .eq('password', password) // 🛑 KIỂM TRA MẬT KHẨU PLAIN TEXT! (NGUY HIỂM)
+        .eq('password', password) //  KIỂM TRA MẬT KHẨU PLAIN TEXT! (NGUY HIỂM)
         .single();
 
     if (dbError || !user) {

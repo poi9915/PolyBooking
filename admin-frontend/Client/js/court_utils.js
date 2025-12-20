@@ -34,7 +34,7 @@ async function uploadFilesToSupabase(files, folderPath) {
             });
 
         if (error) {
-            console.error(`❌ Lỗi khi upload file ${file.name} lên Supabase:`, error.message);
+            console.error(` Lỗi khi upload file ${file.name} lên Supabase:`, error.message);
             // Bạn có thể chọn hiển thị alert ở đây nếu muốn dừng toàn bộ quá trình lưu
             continue; 
         }
@@ -116,7 +116,7 @@ function closeCourtModal() {
     const modal = document.getElementById('court-modal-overlay');
     if (modal) modal.classList.remove('active');
     
-    // 🛑 BỔ SUNG: ẨN form sửa Sân khi đóng modal Sân
+    //  BỔ SUNG: ẨN form sửa Sân khi đóng modal Sân
     const courtEditCard = document.getElementById('court-edit-card');
     if (courtEditCard) {
         courtEditCard.style.display = 'none';
