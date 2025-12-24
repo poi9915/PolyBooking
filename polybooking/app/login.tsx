@@ -7,12 +7,12 @@ import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { useAuthStore } from "@/store/useAuthStore";
-import { supabase } from "@/utils/supabase";
 import { router } from "expo-router";
-import { useState } from "react";
-import { StyleSheet } from 'react-native';
+import React, { useState } from "react";
+import { Image, StyleSheet } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
 import ToastManager, { Toast } from 'toastify-react-native';
+
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -20,86 +20,76 @@ export default function LoginScreen() {
     const { initialize, loading } = useAuthStore();
     const handleShowPassState = () => {
         setShowPassword((showstate) => { return !showstate });
-    }
+    };
+
     const handleEmailLogin = async (email: string, password: string) => {
         const cleanEmail = email.trim();
         if (!cleanEmail || !password) {
             Toast.warn("Vui lòng nhập email và mật khẩu hợp lệ.");
             return;
         }
-        try {
 
-            const { data: existingProfile, error: checkError } = await supabase
-                .from('profiles')
-                .select('id')
-                .eq('email', cleanEmail)
-                .maybeSingle();
+        // Gọi hàm signIn từ store, store sẽ xử lý toàn bộ logic
+        const signIn = useAuthStore.getState().signIn;
+        await signIn(cleanEmail, password);
+    };
 
-            if (checkError) throw checkError;
-
-
-            if (!existingProfile) {
-                Toast.warn("User chưa tồn tại. Vui lòng đăng ký trước khi đăng nhập.");
-                console.log("User ko tồn tại ");
-
-                return; // Dừng luồng tại đây
-            }
-
-            const { data: authData, error: loginError } = await supabase.auth.signInWithPassword({
-                email: cleanEmail,
-                password: password,
-            });
-
-            if (loginError) throw loginError;
-            if (authData.user) {
-                console.log("Đăng nhập thành công:", authData.user);
-                Toast.success("Đăng nhập thành công")
-                router.replace('/(tabs)/home');
-            }
-        } catch (error: any) {
-            console.log("Lỗi quy trình:", error.message);
-            // Toast.error(error.message);
-        }
-
-    }
     return (
         <>
             <SafeAreaView style={styles.container}>
                 <ThemedView style={styles.container}>
-                    <FormControl className="p-4 border border-outline-200 rounded-lg w-full">
-                        <VStack className="gap-4 ">
-                            <Heading className="text-typography-900">Login</Heading>
-                            <VStack space="xs" className="">
-                                <Text className="text-typography-500">Email</Text>
-                                <Input>
-                                    <InputField type="text" value={email} onChangeText={(text) => setEmail(text)} />
-                                </Input>
+                    <VStack space="xl" className="w-full items-center">
+                        <Image
+                            source={require('../assets/images/logo.png')}
+                            style={styles.logo}
+                            resizeMode="contain"
+                        />
+                        <FormControl style={{
+                            padding: 16,
+                            borderRadius: 12,
+                            backgroundColor: 'white',
+                            elevation: 8,
+                            shadowColor: '#000',
+                            shadowOffset: { width: 0, height: -4 },
+                            shadowOpacity: 0.1,
+                            shadowRadius: 8,
+                        }} className=" bg-white  p-4 border border-outline-200 rounded-lg w-full ">
+                            <VStack space="lg">
+                                <Heading className="text-typography-900 text-center">Welcome Back!</Heading>
+                                <VStack space="xs" className="">
+                                    <Text className="text-typography-600">Email</Text>
+                                    <Input>
+                                        <InputField type="text" value={email} onChangeText={(text) => setEmail(text)} />
+                                    </Input>
+                                </VStack>
+                                <VStack space="xs" className="mt-2">
+                                    <Text className="text-typography-600">Password</Text>
+                                    <Input>
+                                        <InputField type={showPassword ? 'text' : 'password'} value={password} onChangeText={(pass) => setPassword(pass)} />
+                                        <InputSlot className="pr-3" onPress={handleShowPassState}>
+                                            <InputIcon as={showPassword ? EyeIcon : EyeOffIcon} />
+                                        </InputSlot>
+                                    </Input>
+                                </VStack >
+                                <VStack space="md" className="mt-4">
+                                    <Button className="w-full" onPress={() => {
+                                        handleEmailLogin(email, password);
+                                    }}>
+                                        <ButtonText>Login</ButtonText>
+                                    </Button>
+                                    {/* <Button variant="outline" className="w-full">
+                                        <ButtonText>Login with Google</ButtonText>
+                                    </Button> */}
+                                    <Text className="text-center mt-2" onPress={() => {
+                                        router.push('/signup')
+                                    }}>Have no account yet? <Text className="font-bold text-primary-500">Signup now!</Text></Text>
+                                </VStack>
                             </VStack>
-                            <VStack space="xs">
-                                <Text className="text-typography-500">Password</Text>
-                                <Input>
-                                    <InputField type={showPassword ? 'text' : 'password'} value={password} onChangeText={(pass) => setPassword(pass)} />
-                                    <InputSlot className="pr-3" onPress={handleShowPassState}>
-                                        <InputIcon as={showPassword ? EyeIcon : EyeOffIcon} />
-                                    </InputSlot>
-                                </Input>
-                            </VStack >
-                            <Text onPress={() => {
-                                router.push('/signup')
-                            }}>Have no account yet? signup now!!</Text>
-                            <Button className="ml-auto w-full" onPress={() => {
-                                handleEmailLogin(email, password);
-                            }}>
-                                <ButtonText>Login</ButtonText>
-                            </Button>
-                            <Button className="ml-auto w-full">
-                                <ButtonText>Login with google</ButtonText>
-                            </Button>
-                        </VStack>
-                    </FormControl>
+                        </FormControl>
+                    </VStack>
                 </ThemedView>
                 <ToastManager />
-            </SafeAreaView>
+            </SafeAreaView >
         </>
     );
 
@@ -109,8 +99,14 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         width: '100%',
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         alignItems: 'center',
         padding: 16,
+        backgroundColor: '#FEF8E9',
     },
+    logo: {
+        width: 200,
+        height: 200,
+        marginBottom: 16,
+    }
 });

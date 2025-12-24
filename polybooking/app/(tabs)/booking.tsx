@@ -1,26 +1,27 @@
 import { Box } from '@/components/ui/box';
-import { Button, ButtonText } from '@/components/ui/button';
 import { Heading } from '@/components/ui/heading';
+import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Tables } from '@/types/database.types';
-import { supabase } from '@/utils/supabase';
-import { AntDesign, Feather } from '@expo/vector-icons';
+import { supabase } from '@/utils/supabase'; // Import supabase
+import { AntDesign, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { Image } from 'expo-image';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, Pressable, RefreshControl, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Pressable, RefreshControl, StyleSheet, View, TextInput, ScrollView } from 'react-native';
 import ActionSheet, { ActionSheetRef } from "react-native-actions-sheet";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 // Mở rộng type Booking để bao gồm thông tin từ court và venue
 type BookingWithDetails = Tables<'bookings'> & {
     courts: {
+        venue_id: number;
         name: string;
         venues: {
-            name: string;
+            name:string;
             images: string[] | null;
         } | null;
     } | null;
@@ -52,6 +53,11 @@ const BookingScreen = () => {
     const [refreshing, setRefreshing] = useState(false);
     const [selectedBooking, setSelectedBooking] = useState<BookingWithDetails | null>(null);
     const actionSheetRef = useRef<ActionSheetRef>(null);
+    const reviewActionSheetRef = useRef<ActionSheetRef>(null);
+    const [rating, setRating] = useState(0);
+    const [reviewContent, setReviewContent] = useState('');
+    const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+    const [ratedVenueIds, setRatedVenueIds] = useState<Set<number>>(new Set());
 
     const fetchBookings = async () => {
         if (!profile) return;
@@ -61,6 +67,7 @@ const BookingScreen = () => {
                 .select(`
           *,
           courts (
+            venue_id,
             name,
             venues (
               name,
@@ -73,6 +80,13 @@ const BookingScreen = () => {
 
             if (error) throw error;
             setBookings(data as BookingWithDetails[]);
+
+            // Lấy danh sách các venue đã được user này đánh giá
+            const { data: ratingsData, error: ratingsError } = await supabase
+                .from('venue_ratings')
+                .select('venue_id')
+                .eq('user_id', profile.id);
+            if (ratingsData) setRatedVenueIds(new Set(ratingsData.map(r => r.venue_id)));
         } catch (error: any) {
             Alert.alert('Lỗi', error.message);
         } finally {
@@ -98,7 +112,7 @@ const BookingScreen = () => {
 
         Alert.alert(
             "Xác nhận hủy",
-            `Bạn có chắc chắn muốn hủy lịch đặt này? Trạng thái sẽ được chuyển thành "${newStatus}".`,
+            `Bạn có chắc chắn muốn hủy lịch đặt này? ".`,
             [
                 { text: "Không" },
                 {
@@ -128,9 +142,49 @@ const BookingScreen = () => {
     };
 
     const handleReviewBooking = () => {
-        // Logic for reviewing a booking will go here
         actionSheetRef.current?.hide();
-        Alert.alert("Thông báo", "Chức năng đánh giá đang được phát triển.");
+        setRating(0); // Reset rating khi mở
+        setReviewContent(''); // Reset content khi mở
+        reviewActionSheetRef.current?.show();
+    }
+
+    const handleSubmitReview = async () => {
+        if (rating === 0) {
+            Alert.alert("Lỗi", "Vui lòng chọn số sao để đánh giá.");
+            return;
+        }
+        if (!profile || !selectedBooking || !selectedBooking.courts?.venue_id) {
+            Alert.alert("Lỗi", "Không tìm thấy thông tin cần thiết để đánh giá.");
+            return;
+        }
+
+        setIsSubmittingReview(true);
+        try {
+            const { error } = await supabase.from('venue_ratings').insert({
+                user_id: profile.id,
+                venue_id: selectedBooking.courts.venue_id,
+                rating: rating,
+                content: reviewContent, // Thêm content vào đây
+            });
+
+            if (error) throw error;
+
+            Alert.alert("Thành công", "Cảm ơn bạn đã gửi đánh giá!");
+            reviewActionSheetRef.current?.hide();
+            // Cập nhật lại danh sách đã đánh giá để UI thay đổi ngay lập tức
+            setRatedVenueIds(prev => {
+                const newSet = new Set(prev);
+                newSet.add(selectedBooking.courts!.venue_id);
+                return newSet;
+            });
+        } catch (error: any) {
+            console.error("Review submission error:", error);
+            // Giả sử lỗi '23505' là lỗi unique constraint (đã đánh giá rồi)
+            const message = error.code === '23505' ? "Bạn đã đánh giá địa điểm này rồi." : `Đã có lỗi xảy ra: ${error.message}`;
+            Alert.alert("Lỗi", message);
+        } finally {
+            setIsSubmittingReview(false);
+        }
     }
 
 
@@ -150,7 +204,7 @@ const BookingScreen = () => {
             if (startStr.endsWith("+00")) startStr = startStr.replace("+00", "Z");
             if (endStr.endsWith("+00")) endStr = endStr.replace("+00", "Z");
             startDate = new Date(startStr);
-endDate = new Date(endStr);
+            endDate = new Date(endStr);
         } else if (typeof item.during === "string") {
             // Clean ký tự đặc biệt
             const cleanStr = item.during.replace(/[\[\]()"]/g, '');
@@ -224,31 +278,81 @@ endDate = new Date(endStr);
                 />
             </SafeAreaView>
 
-            <ActionSheet ref={actionSheetRef} gestureEnabled containerStyle={{ paddingBottom: 20 }}>
-                <VStack className="p-4 space-y-5 ">
-                    <Pressable
-                        className="flex-row items-center gap-4 m-5"
-                        onPress={handleReviewBooking}
-                    >
-                        <Feather name="star" size={24} color="black" />
-                        <Text className="text-lg">Đánh giá</Text>
-                    </Pressable>
-                    <Pressable
-                        className="flex-row items-center gap-4 m-5"
-                        onPress={() => {
-                            actionSheetRef.current?.hide();
-                            if (selectedBooking) handleCancelBooking(selectedBooking);
-                        }}
-                    >
-                        <Feather name="trash-2" size={24} color="red" />
-                        <Text className="text-lg text-red-500">Hủy lịch</Text>
-                    </Pressable>
-                </VStack>
+            {selectedBooking && (
+                <ActionSheet ref={actionSheetRef} gestureEnabled containerStyle={{ paddingBottom: 20 }}>{(() => {
+                    const hasRated = selectedBooking.courts?.venue_id ? ratedVenueIds.has(selectedBooking.courts.venue_id) : false;
+                    const canReview = ['paid', 'completed'].includes(selectedBooking.status);
+
+                    return (
+                        <VStack className="p-4 space-y-5 ">
+                            <Pressable
+                                disabled={!canReview || hasRated}
+                                className={`flex-row items-center gap-4 m-5 ${(!canReview || hasRated) ? 'opacity-50' : ''}`}
+                                onPress={handleReviewBooking}
+                            >
+                                <Feather name={hasRated ? "check-circle" : "star"} size={24} color={!canReview || hasRated ? 'gray' : 'black'} />
+                                <Text className={`text-lg ${!canReview || hasRated ? 'text-gray-500' : ''}`}>
+                                    {hasRated ? "Bạn đã đánh giá sân này" : "Đánh giá"}
+                                </Text>
+                            </Pressable>
+
+
+                            <Pressable
+                                disabled={['cancelled', 'refund_requested'].includes(selectedBooking.status)}
+                                className={`flex-row items-center gap-4 m-5 ${['cancelled', 'refund_requested'].includes(selectedBooking.status) ? 'opacity-50' : ''}`}
+                                onPress={() => {
+                                    if (['cancelled', 'refund_requested'].includes(selectedBooking.status)) return;
+                                    actionSheetRef.current?.hide();
+                                    if (selectedBooking) handleCancelBooking(selectedBooking);
+                                }}
+                            >
+                                <Feather name="trash-2" size={24} color={['cancelled', 'refund_requested'].includes(selectedBooking.status) ? 'gray' : 'red'} />
+                                <Text className={`text-lg ${['cancelled', 'refund_requested'].includes(selectedBooking.status) ? 'text-gray-500' : 'text-red-500'}`}>
+                                    Hủy lịch
+                                </Text>
+                            </Pressable>
+                        </VStack>
+                    );
+                })()}</ActionSheet>
+            )}
+
+            <ActionSheet ref={reviewActionSheetRef} gestureEnabled containerStyle={{ paddingBottom: 20 }}>
+                <ScrollView keyboardShouldPersistTaps="handled">
+                    <VStack className="p-6 space-y-5 items-center">
+                        <Heading>Đánh giá địa điểm</Heading>
+                        <Text className="text-center text-gray-500">
+                            {selectedBooking?.courts?.venues?.name || 'Địa điểm này'}
+                        </Text>
+                        <View className="flex-row space-x-2 py-4">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                                <Pressable key={star} onPress={() => setRating(star)}>
+                                    {star <= rating ? (
+                                        <AntDesign name="star" size={36} color="#facc15" />
+                                    ) : (
+                                        <MaterialCommunityIcons name="star-outline" size={36} color="gray" />
+                                    )}
+                                </Pressable>
+                            ))}
+                        </View>
+                        <TextInput
+                            placeholder="Viết đánh giá của bạn (không bắt buộc)"
+                            value={reviewContent}
+                            onChangeText={setReviewContent}
+                            multiline
+                            style={styles.textInput}
+                        />
+                        <Pressable
+                            disabled={isSubmittingReview}
+                            onPress={handleSubmitReview}
+                            className={`w-full p-3 rounded-lg ${isSubmittingReview ? 'bg-gray-400' : 'bg-primary-500'}`}>
+                            <Text className="text-white text-center font-bold text-lg">{isSubmittingReview ? 'Đang gửi...' : 'Gửi đánh giá'}</Text>
+                        </Pressable>
+                    </VStack>
+                </ScrollView>
             </ActionSheet>
         </>
     );
 };
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -291,6 +395,15 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: -4 },
         shadowOpacity: 0.1,
         shadowRadius: 8,
+    },
+    textInput: {
+        width: '100%',
+        height: 100,
+        borderWidth: 1,
+        borderColor: '#d1d5db', // gray-300
+        borderRadius: 8,
+        padding: 10,
+        textAlignVertical: 'top'
     }
 });
 

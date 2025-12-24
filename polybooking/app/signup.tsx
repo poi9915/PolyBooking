@@ -8,8 +8,8 @@ import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { supabase } from "@/utils/supabase";
 import { router } from "expo-router";
-import { useState } from "react";
-import { StyleSheet } from 'react-native';
+import React, { useState } from "react";
+import { Image, StyleSheet } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
 import ToastManager, { Toast } from 'toastify-react-native';
 
@@ -78,49 +78,66 @@ export default function SignupScreen() {
         <>
             <SafeAreaView style={styles.container}>
                 <ThemedView style={styles.container}>
-                    <FormControl className="p-4 border border-outline-200 rounded-lg w-full">
-                        <VStack className="gap-4 ">
-                            <Heading className="text-typography-900">Signup</Heading>
-                            <VStack space="xs" className="">
-                                <Text className="text-typography-500">Username</Text>
-                                <Input>
-                                    <InputField type="text" value={userName} onChangeText={(text) => setUserName(text)} />
-                                </Input>
+                    <VStack space="xl" className="w-full items-center">
+                        <Image
+                            source={require('../assets/images/logo.png')}
+                            style={styles.logo}
+                            resizeMode="contain"
+                        />
+                        <FormControl style={{
+                            padding: 16,
+                            borderRadius: 12,
+                            backgroundColor: 'white',
+                            elevation: 8,
+                            shadowColor: '#000',
+                            shadowOffset: { width: 0, height: -4 },
+                            shadowOpacity: 0.1,
+                            shadowRadius: 8,
+                        }} className=" bg-white p-4 border border-outline-200 rounded-lg w-full">
+                            <VStack space="lg">
+                                <Heading className="text-typography-900 text-center">Create an Account</Heading>
+                                <VStack space="xs">
+                                    <Text className="text-typography-600">Username</Text>
+                                    <Input>
+                                        <InputField type="text" value={userName} onChangeText={(text) => setUserName(text)} />
+                                    </Input>
+                                </VStack>
+                                <VStack space="xs">
+                                    <Text className="text-typography-600">Email</Text>
+                                    <Input>
+                                        <InputField type="text" value={email} onChangeText={(text) => setEmail(text)} />
+                                    </Input>
+                                </VStack>
+                                <VStack space="xs">
+                                    <Text className="text-typography-600">Password</Text>
+                                    <Input>
+                                        <InputField type={showPassword ? 'text' : 'password'} value={password} onChangeText={(text) => setPassword(text)} />
+                                        <InputSlot className="pr-3" onPress={handleShowPassState}>
+                                            <InputIcon as={showPassword ? EyeIcon : EyeOffIcon} />
+                                        </InputSlot>
+                                    </Input>
+                                </VStack >
+                                <VStack space="xs">
+                                    <Text className="text-typography-600">Confirm Password</Text>
+                                    <Input>
+                                        <InputField type={showPassword ? 'text' : 'password'} value={CfPassword} onChangeText={(text) => setCfPassword(text)} />
+                                        <InputSlot className="pr-3" onPress={handleShowPassState}>
+                                            <InputIcon as={showPassword ? EyeIcon : EyeOffIcon} />
+                                        </InputSlot>
+                                    </Input>
+                                </VStack >
+                                <Button className="w-full mt-2" onPress={() => {
+                                    handleEmailSignup(userName, email, password);
+                                }}>
+                                    <ButtonText>Signup</ButtonText>
+                                </Button>
                             </VStack>
-                            <VStack space="xs" className="">
-                                <Text className="text-typography-500">Email</Text>
-                                <Input>
-                                    <InputField type="text" value={email} onChangeText={(text) => setEmail(text)} />
-                                </Input>
-                            </VStack>
-                            <VStack space="xs">
-                                <Text className="text-typography-500">Password</Text>
-                                <Input>
-                                    <InputField type={showPassword ? 'text' : 'password'} value={password} onChangeText={(text) => setPassword(text)} />
-                                    <InputSlot className="pr-3" onPress={handleShowPassState}>
-                                        <InputIcon as={showPassword ? EyeIcon : EyeOffIcon} />
-                                    </InputSlot>
-                                </Input>
-                            </VStack >
-                            <VStack space="xs">
-                                <Text className="text-typography-500">Confirm Password</Text>
-                                <Input>
-                                    <InputField type={showPassword ? 'text' : 'password'} value={CfPassword} onChangeText={(text) => setCfPassword(text)} />
-                                    <InputSlot className="pr-3" onPress={handleShowPassState}>
-                                        <InputIcon as={showPassword ? EyeIcon : EyeOffIcon} />
-                                    </InputSlot>
-                                </Input>
-                            </VStack >
-                            <Button className="ml-auto w-full" onPress={() => {
-                                handleEmailSignup(userName, email, password);
-                            }}>
-                                <ButtonText>Signup</ButtonText>
-                            </Button>
-                        </VStack>
-                    </FormControl>
+                        </FormControl>
+                    </VStack>
+
                 </ThemedView>
                 <ToastManager />
-            </SafeAreaView>
+            </SafeAreaView >
         </>
     )
 }
@@ -129,8 +146,14 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         width: '100%',
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         alignItems: 'center',
         padding: 16,
+        backgroundColor: '#FEF8E9',
     },
+    logo: {
+        width: 180,
+        height: 180,
+        marginBottom: 8,
+    }
 });

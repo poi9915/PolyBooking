@@ -1,33 +1,55 @@
-import {Button, ButtonIcon, ButtonText} from "@/components/ui/button";
-import {Card} from "@/components/ui/card";
-import {Heading} from "@/components/ui/heading";
-import {ArrowRightIcon, CheckIcon, GlobeIcon, Icon} from "@/components/ui/icon";
-import {Link} from "@/components/ui/link";
-import {Skeleton, SkeletonText} from "@/components/ui/skeleton";
-import {Text} from "@/components/ui/text";
-import {VStack} from "@/components/ui/vstack";
-import {useVenueStore} from "@/store/useVenueStore";
-import {Image} from "expo-image";
-import {router, useLocalSearchParams} from "expo-router";
-import {useEffect} from "react";
-import {Dimensions, ScrollView, StyleSheet, View} from "react-native";
-import {SafeAreaView} from "react-native-safe-area-context";
-import {StarRatingDisplay} from 'react-native-star-rating-widget';
-import {SwiperFlatList} from 'react-native-swiper-flatlist';
+import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Heading } from "@/components/ui/heading";
+import { ArrowRightIcon, CheckIcon, GlobeIcon, Icon } from "@/components/ui/icon";
+import { Link } from "@/components/ui/link";
+import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
+import { Text } from "@/components/ui/text";
+import { VStack } from "@/components/ui/vstack";
+import { useVenueStore } from "@/store/useVenueStore";
+import { Image } from "expo-image";
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
+import { Dimensions, ScrollView, StyleSheet, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { StarRatingDisplay } from 'react-native-star-rating-widget';
+import { SwiperFlatList } from 'react-native-swiper-flatlist';
+import { Tables } from "@/types/database.types";
+import { supabase } from "@/utils/supabase";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 
-const {width} = Dimensions.get('window');
+const { width } = Dimensions.get('window');
+
+type ReviewWithProfile = Tables<'venue_ratings'> & {
+    profiles: Pick<Tables<'profiles'>, 'username' | 'avatar_url'> | null
+};
+
 
 export default function Venue() {
-    const {id} = useLocalSearchParams();
-    const {activeVenue, courts, loading, fetchVenueById} = useVenueStore();
+    const { id } = useLocalSearchParams();
+    const { activeVenue, courts, loading, fetchVenueById } = useVenueStore();
+    const [reviews, setReviews] = useState<ReviewWithProfile[]>([]);
 
     useEffect(() => {
+        const fetchReviews = async (venueId: number) => {
+            const { data, error } = await supabase
+                .from('venue_ratings')
+                .select(`*, profiles(username, avatar_url)`)
+                .eq('venue_id', venueId)
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error("Error fetching reviews:", error);
+            } else {
+                setReviews(data as ReviewWithProfile[]);
+            }
+        };
 
         if (id) {
-            fetchVenueById(Number(id));
+            const venueId = Number(id);
+            fetchVenueById(venueId);
+            fetchReviews(venueId);
         }
-
-
     }, [id]);
 
     // Lọc chỉ những sân con đang hoạt động
@@ -52,7 +74,7 @@ export default function Venue() {
     // --- SKELETON LOADER ---
     if (loading) {
         // Hiển thị giao diện chờ trong khi tải dữ liệu
-        return <VenueDetailSkeleton/>;
+        return <VenueDetailSkeleton />;
     }
 
     if (!activeVenue) {
@@ -73,11 +95,11 @@ export default function Venue() {
                             autoplayDelay={3}
                             autoplayLoop
                             data={displayImages}
-                            renderItem={({item}) => (
+                            renderItem={({ item }) => (
                                 <View style={styles.slide}>
-                                    <Image source={item ? {uri: item} : require('@/assets/images/Spinner.gif')}
-                                           style={styles.image} alt={item ? 'Venue image' : 'Placeholder'}
-                                           contentFit='fill'/>
+                                    <Image source={item ? { uri: item } : require('@/assets/images/Spinner.gif')}
+                                        style={styles.image} alt={item ? 'Venue image' : 'Placeholder'}
+                                        contentFit='fill' />
                                 </View>
                             )}
                         />
@@ -87,13 +109,13 @@ export default function Venue() {
                     <VStack space="md" className="p-4">
                         <Heading size="xl">{activeVenue.name}</Heading>
                         <Link href="#" className="flex-row items-center -mt-2">
-                            <Icon as={GlobeIcon} size="sm" className="mr-2 text-typography-500"/>
+                            <Icon as={GlobeIcon} size="sm" className="mr-2 text-typography-500" />
                             <Text isTruncated className="text-typography-600 underline">{activeVenue.address}</Text>
                         </Link>
 
                         <View className="flex-row justify-between items-center mt-2">
                             <Text size="lg" bold>{Number(activeVenue.price).toLocaleString('vi-VN')}đ/h</Text>
-                            <StarRatingDisplay rating={activeVenue.rating || 0} starSize={24}/>
+                            <StarRatingDisplay rating={activeVenue.rating || 0} starSize={24} />
                         </View>
 
                         <View className="flex-row gap-4">
@@ -113,7 +135,7 @@ export default function Venue() {
                             <View className="flex-row flex-wrap gap-2">
                                 {amenities.map(amenity => (
                                     <View key={amenity} className="flex-row items-center bg-gray-100 p-2 rounded">
-                                        <Icon as={CheckIcon} size="sm" className="mr-1"/>
+                                        <Icon as={CheckIcon} size="sm" className="mr-1" />
                                         <Text size="sm" className="capitalize">{amenity}</Text>
                                     </View>
                                 ))}
@@ -126,14 +148,34 @@ export default function Venue() {
                         <Heading size="lg">Các sân có sẵn</Heading>
                         {activeCourts.length > 0 ? activeCourts.map(court => (
                             <Card key={court.id}
-                                  className="p-3 flex-row justify-between items-center shadow-sm bg-gray-50">
+                                className="p-3 flex-row justify-between items-center shadow-sm bg-gray-50">
                                 <VStack>
                                     <Text bold>{court.name}</Text>
                                     <Text size="sm"
-                                          className="text-typography-500">Giá: {court.default_price_per_hour.toLocaleString('vi-VN')}đ/h</Text>
+                                        className="text-typography-500">Giá: {court.default_price_per_hour.toLocaleString('vi-VN')}đ/h</Text>
                                 </VStack>
                             </Card>
                         )) : <Text>Hiện không có sân nào hoạt động.</Text>}
+                    </VStack>
+                    {/* Reviews */}
+                    <VStack space="sm" className="p-4 pt-0">
+                        <Heading size="lg">Đánh giá từ người dùng</Heading>
+                        {reviews.length > 0 ? reviews.map(review => (
+                            <Card key={review.id} className="p-3 shadow-sm bg-gray-50">
+                                <View className="flex-row items-start gap-3">
+                                    <Avatar>
+                                        <AvatarImage source={{ uri: review.profiles?.avatar_url || undefined }} />
+                                    </Avatar>
+                                    <VStack className="flex-1">
+                                        <View className="flex-row justify-between items-center">
+                                            <Text bold>{review.profiles?.username || 'Ẩn danh'}</Text>
+                                            <StarRatingDisplay rating={review.rating} starSize={16} />
+                                        </View>
+                                        <Text className="mt-1 text-typography-600">{review.content}</Text>
+                                    </VStack>
+                                </View>
+                            </Card>
+                        )) : <Text>Chưa có đánh giá nào cho địa điểm này.</Text>}
                     </VStack>
                 </Card>
             </ScrollView>
@@ -142,7 +184,7 @@ export default function Venue() {
             <View style={styles.fabContainer}>
                 <Button size="lg" className="rounded-full shadow-lg" onPress={handleBooking}>
                     <ButtonText>Đặt sân</ButtonText>
-                    <ButtonIcon as={ArrowRightIcon} className="ml-2"/>
+                    <ButtonIcon as={ArrowRightIcon} className="ml-2" />
                 </Button>
             </View>
         </SafeAreaView>
@@ -155,30 +197,30 @@ const VenueDetailSkeleton = () => {
         <SafeAreaView style={styles.container}>
             <ScrollView>
                 {/* Skeleton cho Image Slider */}
-                <Skeleton className="h-[250px] w-full"/>
+                <Skeleton className="h-[250px] w-full" />
 
                 <VStack space="md" className="p-4">
                     {/* Skeleton cho Tên và Địa chỉ */}
-                    <SkeletonText className="h-8 w-3/4"/>
-                    <SkeletonText className="h-5 w-full mt-1"/>
+                    <SkeletonText className="h-8 w-3/4" />
+                    <SkeletonText className="h-5 w-full mt-1" />
 
                     {/* Skeleton cho Tags */}
                     <View className="flex-row gap-4 mt-2">
-                        <Skeleton className="h-7 w-24 rounded"/>
-                        <Skeleton className="h-7 w-24 rounded"/>
+                        <Skeleton className="h-7 w-24 rounded" />
+                        <Skeleton className="h-7 w-24 rounded" />
                     </View>
 
                     {/* Skeleton cho Giá và Rating */}
                     <View className="flex-row justify-between items-center mt-4">
-                        <SkeletonText className="h-7 w-1/3"/>
-                        <Skeleton className="h-6 w-28"/>
+                        <SkeletonText className="h-7 w-1/3" />
+                        <Skeleton className="h-6 w-28" />
                     </View>
 
                     {/* Skeleton cho Sân con */}
                     <VStack space="sm" className="mt-6">
-                        <SkeletonText className="h-7 w-1/2 mb-2"/>
-                        <Skeleton className="h-16 w-full rounded-lg"/>
-                        <Skeleton className="h-16 w-full rounded-lg"/>
+                        <SkeletonText className="h-7 w-1/2 mb-2" />
+                        <Skeleton className="h-16 w-full rounded-lg" />
+                        <Skeleton className="h-16 w-full rounded-lg" />
                     </VStack>
                 </VStack>
             </ScrollView>
@@ -223,7 +265,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         elevation: 2,
         shadowColor: '#000',
-        shadowOffset: {width: 0, height: -4},
+        shadowOffset: { width: 0, height: -4 },
         shadowOpacity: 0.1,
         shadowRadius: 1,
     },
@@ -233,7 +275,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         elevation: 1,
         shadowColor: '#000',
-        shadowOffset: {width: 0, height: -4},
+        shadowOffset: { width: 0, height: -4 },
         shadowOpacity: 0.1,
         shadowRadius: 0.5,
     }
