@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Quản lý Dịch vụ</title>
     <!-- CSS dùng chung -->
-    
+    <link rel="stylesheet" href="./css/style_base.css" />
+    <link rel="stylesheet" href="./css/service.css" />
     <!-- Có thể tạo thêm service.css nếu muốn -->
     <style>
 
@@ -127,17 +128,17 @@
                 </label>
             </div>
 
-            <menu>
+            <div class="dialog-actions">
                 
                 <button type="submit" class="save-button">Lưu</button>
-                <button type="button" class="action-btn" onclick="closeServiceModal()">Hủy</button>
-            </menu>
+                <button type="button" class="action-btn" onclick="closeServiceModal()" style="background-color: #d32f2f;">Hủy</button>
+            </div>
+            
 
         </form>
     </dialog>
 
-    <link rel="stylesheet" href="./css/style_base.css" />
-    <link rel="stylesheet" href="./css/service.css" />
+    
     <!-- SCRIPT -->
     <script src="./js/loadSliderBar.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

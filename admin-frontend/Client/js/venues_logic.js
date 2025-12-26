@@ -531,7 +531,7 @@ async function loadCourtsByVenue(venueId) {
                 <td>${statusDisplay}</td>
                 <td>
                     <button class="action-btn edit-court-btn" data-id="${court.id}">Sửa</button>
-                    <button class="action-btn delete-court-btn" data-id="${court.id}">Xóa</button>
+                    <button class="action-btn delete-court-btn" style="background-color: #d32f2f;data-id="${court.id}">Xóa</button>
                 </td>
             </tr>
         `;

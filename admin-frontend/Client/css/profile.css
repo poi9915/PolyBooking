@@ -1,0 +1,202 @@
+/* =============================== */
+/* ADMIN ACCOUNT PAGE (OVERRIDE)  */
+/* =============================== */
+
+/* Tiêu đề card */
+.card h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--text-color);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+}
+
+/* Avatar admin (trên header) */
+.profile-avatar {
+    width: 44px;
+    height: 44px;
+    font-size: 16px;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+}
+
+/* Card thông tin */
+.management-grid .card {
+    position: relative;
+    overflow: hidden;
+}
+
+/* Thanh nhấn bên trái card (tạo cảm giác enterprise) */
+
+
+/* Input readonly nhìn như text enterprise */
+.form-group input[disabled] {
+    background-color: #f8f9fa;
+    color: var(--text-color);
+    font-weight: 500;
+    border: 1px solid var(--border-color);
+    cursor: default;
+}
+
+/* Label */
+.form-group label {
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+/* Nút hành động */
+.change-password-btn,
+.logout-btn,
+.reset-password-btn {
+    width: 100%;
+    font-size: 15px;
+    padding: 12px;
+    border-radius: 8px;
+}
+
+/* Nút đổi mật khẩu */
+.change-password-btn {
+    background: linear-gradient(135deg, #28a745, #1e7e34);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.35);
+}
+
+/* Nút đăng xuất */
+.logout-btn {
+    background: linear-gradient(135deg, #dc3545, #a71d2a);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.35);
+}
+.reset-password-btn{
+    background: linear-gradient(135deg, #5014f5, #0f00e0);
+    box-shadow: 0 4px 12px rgba(80, 20, 245, 0.35);
+}
+
+/* Hover nhìn cao cấp hơn */
+.change-password-btn:hover,
+.logout-btn:hover,
+.reset-password-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Khoảng cách card */
+.management-grid {
+    align-items: flex-start;
+}
+
+/* Responsive chỉnh lại cho gọn */
+@media (max-width: 768px) {
+    .management-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-avatar {
+        display: none;
+    }
+}
+/* =============================== */
+/* FIX: 2 CARD BẰNG CHIỀU CAO     */
+/* =============================== */
+
+.management-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+    align-items: stretch; /* 💥 QUAN TRỌNG */
+}
+
+/* Card chiếm full chiều cao cột */
+.management-grid .card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+/* NỀN MỜ */
+.staff-modal::backdrop {
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(3px);
+}
+
+/* ================================
+   DIALOG ĐỔI MẬT KHẨU – CĂN GIỮA
+================================ */
+
+.password-dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    width: 420px;
+    max-width: 95vw;
+    padding: 25px;
+
+    border: none;
+    border-radius: 12px;
+    background: #ffffff;
+
+    box-shadow: 0px 10px 40px rgba(0, 0, 0, 0.25);
+
+    animation: fadeIn 0.2s ease-out;
+}
+
+/* Backdrop tối nền */
+.password-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.55);
+}
+
+/* ================================
+   FORM TRONG DIALOG
+================================ */
+
+.password-dialog .form-group {
+    margin-bottom: 14px;
+}
+
+.password-dialog label {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.password-dialog input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+}
+
+/* ================================
+   TIÊU ĐỀ
+================================ */
+
+.password-dialog h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 18px;
+    text-align: center;
+}
+
+
+
+
+
+/* ================================
+ANIMATION
+================================ */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -55%);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+

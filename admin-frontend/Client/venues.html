@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý Khu Vực</title>
-    <link rel="stylesheet" href="/admin-frontend/Client/css/style_base.css">
-    <link rel="stylesheet" href="/admin-frontend/Client/css/style_courts.css">
+    <link rel="stylesheet" href="./css/style_base.css">
+    <link rel="stylesheet" href="./css/style_courts.css">
     <style>
         /* Thêm style cho thẻ img và trạng thái */
         .image-preview {
@@ -140,144 +140,146 @@
         </div>
     </div>
     <!-- ===================== VENUE MODAL (dialog) ===================== -->
-<dialog id="venue-modal" class="staff-modal">
-    <form method="dialog" id="venue-modal-form">
+    <dialog id="venue-modal" class="staff-modal">
+        <form method="dialog" id="venue-modal-form">
 
-        <h3 id="venue-modal-title">Chi tiết Khu Vực</h3>
+            <h3 id="venue-modal-title">Chi tiết Khu Vực</h3>
 
-        <fieldset id="venue-details-fieldset">
-            <legend>Chi tiết Khu Vực</legend>
+            <fieldset id="venue-details-fieldset">
+                <legend>Chi tiết Khu Vực</legend>
 
-            <div class="form-group">
-                <label for="venue-name">Tên Khu Vực:</label>
-                <input type="text" id="venue-name">
+                <div class="form-group">
+                    <label for="venue-name">Tên Khu Vực:</label>
+                    <input type="text" id="venue-name">
+                </div>
+                <div class="form-group">
+                    <label for="venue-code">Mã Khu Vực:</label>
+                    <input type="text" id="venue-code">
+                </div>
+
+                <div class="form-group">
+                    <label for="venue-address">Địa chỉ:</label>
+                    <input type="text" id="venue-address">
+                </div>
+
+                <div class="form-group">
+                    <label for="venue-country">Tỉnh/Thành phố:</label>
+                    <input type="text" id="venue-country">
+                </div>
+
+                <div class="form-group">
+                    <label for="venue-surface">Loại Sân:</label>
+                    <input type="text" id="venue-surface">
+                </div>
+
+                <div class="form-group">
+                    <label for="venue-is-indoor">Trong Nhà:</label>
+                    <select id="venue-is-indoor">
+                        <option value="true">Có</option>
+                        <option value="false">Không</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="venue-contact-email">Email:</label>
+                    <input type="email" id="venue-contact-email">
+                </div>
+
+                <div class="form-group">
+                    <label for="venue-contact-phone">SĐT:</label>
+                    <input type="tel" id="venue-contact-phone">
+                </div>
+
+                <div class="form-group">
+                    <label>Ảnh khu vực:</label>
+                    <input type="file" id="venue-image-upload" accept="image/*" multiple>
+                    <div id="venue-images-preview" class="image-preview"></div>
+                </div>
+            </fieldset>
+
+            <section class="card" id="court-list-in-modal-card" style="margin-top:20px; display:none;">
+
+                <button id="add-court-to-venue-btn" class="add-button" style="margin-left:10px; display:none;">
+                    + Thêm Sân
+                </button>
+
+
+                <div class="table-responsive">
+                    <table class="data-table field-table">
+                        <thead>
+                            <tr>
+                                <th>Tên Sân</th>
+                                <th>Sức chứa</th>
+                                <th>Giá</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="courts-by-venue-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <div class="dialog-actions">
+                <button type="button" id="save-venue-details-btn" class="save-button">Lưu</button>
+                <button type="button" class="action-btn" onclick="closeVenueModal()"
+                    style="background-color: #d32f2f;">Hủy</button>
             </div>
+        </form>
+    </dialog>
+
+    <!-- ===================== COURT MODAL (dialog) ===================== -->
+    <dialog id="court-modal" class="staff-modal">
+        <form method="dialog" id="court-modal-form">
+            <h3 id="court-modal-title">Thêm Sân</h3>
+
+            <input type="hidden" id="current-court-id">
+            <input type="hidden" id="court-venue-id">
+
             <div class="form-group">
-                <label for="venue-code">Mã Khu Vực:</label>
-                <input type="text" id="venue-code">
+                <label for="court-name">Tên Sân:</label>
+                <input type="text" id="court-name" required>
             </div>
 
             <div class="form-group">
-                <label for="venue-address">Địa chỉ:</label>
-                <input type="text" id="venue-address">
+                <label for="court-code">Mã Sân:</label>
+                <input type="text" id="court-code" required>
             </div>
 
             <div class="form-group">
-                <label for="venue-country">Tỉnh/Thành phố:</label>
-                <input type="text" id="venue-country">
-            </div>
-
-            <div class="form-group">
-                <label for="venue-surface">Loại Sân:</label>
-                <input type="text" id="venue-surface">
-            </div>
-
-            <div class="form-group">
-                <label for="venue-is-indoor">Trong Nhà:</label>
-                <select id="venue-is-indoor">
-                    <option value="true">Có</option>
-                    <option value="false">Không</option>
+                <label for="court-capacity">Sức chứa:</label>
+                <select id="court-capacity">
+                    <option value="2">2 người</option>
+                    <option value="4">4 người</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label for="venue-contact-email">Email:</label>
-                <input type="email" id="venue-contact-email">
+                <label for="court-price">Giá/giờ:</label>
+                <input type="number" id="court-price" required>
             </div>
 
             <div class="form-group">
-                <label for="venue-contact-phone">SĐT:</label>
-                <input type="tel" id="venue-contact-phone">
+                <label for="court-is-active">Trạng thái:</label>
+                <select id="court-is-active">
+                    <option value="true">Hoạt động</option>
+                    <option value="false">Bảo trì</option>
+                </select>
             </div>
 
             <div class="form-group">
-                <label>Ảnh khu vực:</label>
-                <input type="file" id="venue-image-upload" accept="image/*" multiple>
-                <div id="venue-images-preview" class="image-preview"></div>
+                <label>Ảnh sân:</label>
+                <input type="file" id="court-image-upload" accept="image/*" multiple>
+                <div id="court-images-preview" class="image-preview"></div>
             </div>
-        </fieldset>
 
-        <section class="card" id="court-list-in-modal-card" style="margin-top:20px; display:none;">
-            
-                <button id="add-court-to-venue-btn" class="add-button" style="margin-left:10px; display:none;">
-                    + Thêm Sân
-                </button>
-            
-
-            <div class="table-responsive">
-                <table class="data-table field-table">
-                    <thead>
-                        <tr>
-                            <th>Tên Sân</th>
-                            <th>Sức chứa</th>
-                            <th>Giá</th>
-                            <th>Trạng thái</th>
-                            <th>Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody id="courts-by-venue-tbody"></tbody>
-                </table>
+            <div class="dialog-actions">
+                <button type="button" id="save-court-details-btn" class="save-button">Lưu</button>
+                <button type="button" class="action-btn" onclick="closeCourtModal()"
+                    style="background-color: #d32f2f;">Hủy</button>
             </div>
-        </section>
-
-        <menu>
-            <button type="button" id="save-venue-details-btn" class="save-button">Lưu</button>
-            <button type="button" class="action-btn" onclick="closeVenueModal()">Hủy</button>
-        </menu>
-    </form>
-</dialog>
-
-<!-- ===================== COURT MODAL (dialog) ===================== -->
-<dialog id="court-modal" class="staff-modal">
-    <form method="dialog" id="court-modal-form">
-        <h3 id="court-modal-title">Thêm Sân</h3>
-
-        <input type="hidden" id="current-court-id">
-        <input type="hidden" id="court-venue-id">
-
-        <div class="form-group">
-            <label for="court-name">Tên Sân:</label>
-            <input type="text" id="court-name" required>
-        </div>
-
-        <div class="form-group">
-            <label for="court-code">Mã Sân:</label>
-            <input type="text" id="court-code" required>
-        </div>
-
-        <div class="form-group">
-            <label for="court-capacity">Sức chứa:</label>
-            <select id="court-capacity">
-                <option value="2">2 người</option>
-                <option value="4">4 người</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label for="court-price">Giá/giờ:</label>
-            <input type="number" id="court-price" required>
-        </div>
-
-        <div class="form-group">
-            <label for="court-is-active">Trạng thái:</label>
-            <select id="court-is-active">
-                <option value="true">Hoạt động</option>
-                <option value="false">Bảo trì</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label>Ảnh sân:</label>
-            <input type="file" id="court-image-upload" accept="image/*" multiple>
-            <div id="court-images-preview" class="image-preview"></div>
-        </div>
-
-        <menu>
-            <button type="button" id="save-court-details-btn" class="save-button">Lưu</button>
-            <button type="button" class="action-btn" onclick="closeCourtModal()">Hủy</button>
-        </menu>
-    </form>
-</dialog>
+        </form>
+    </dialog>
 
 </body>
 

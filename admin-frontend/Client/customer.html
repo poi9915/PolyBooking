@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý Khách hàng</title>
+    <link rel="stylesheet" href="./css/style_base.css">
+    <link rel="stylesheet" href="./css/customer.css">
 
 </head>
 
@@ -57,18 +59,18 @@
 
             <textarea id="lock-reason-input" placeholder="Nhập lý do khóa tài khoản..." rows="4"></textarea>
 
-            <div class="modal-actions">
+            <div class="dialog-actions">
                 <button id="confirm-lock-btn" style="background-color: red;color: white;padding: 3px;">Khóa</button>
                 <button style="background-color:#007bff;color: white;padding: 3px;" onclick="closeLockDialog()">Hủy</button>
             </div>
+            
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="./js/client_config.js"></script>
     <script src="./js/loadSliderBar.js"> </script>
-    <link rel="stylesheet" href="./css/style_base.css">
-    <link rel="stylesheet" href="./css/customer.css">
+    
     <script src="./js/customer.js"> </script>
 </body>
 

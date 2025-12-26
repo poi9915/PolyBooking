@@ -557,3 +557,20 @@ table tbody td {
 .secondary-button:hover {
     background-color: #c82333;
 }
+/* ============================= */
+/* FIX CHUẨN ACTION BUTTON MODAL */
+/* ============================= */
+
+.modal-footer {
+    display: flex;
+    gap: 14px;
+}
+
+.modal-footer .action-btn,
+.modal-footer .primary-button,
+.modal-footer .secondary-button,
+.modal-footer .danger-button {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+}
