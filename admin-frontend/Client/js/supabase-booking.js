@@ -605,8 +605,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       const endISO = toISOWithTZ(date, end);
       const duration = calcDuration(startISO, endISO);
       const totalHours = duration.totalHours;
-      const totalPrice = Math.round(totalHours * pricePerHour);
-      editPriceInput.value = totalPrice;
+      const courtTotal = Math.round(totalHours * pricePerHour);
+      const serviceTotal = selectedServices.reduce(
+        (sum, s) => sum + s.price * s.quantity,
+        0
+      );
+      editPriceInput.value = courtTotal + serviceTotal;
     });
   });
 
@@ -638,14 +642,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     const court = courts.find(c => c.id === courtId);
     const pricePerHour = court?.default_price_per_hour || 0;
     const duration = calcDuration(startISO, endISO);
-    const totalHours = duration.totalHours;
-
+    const hours = duration.totalHours;
     const courtTotal = Math.round(hours * pricePerHour);
     const serviceTotal = selectedServices.reduce(
       (sum, s) => sum + s.price * s.quantity,
       0
     );
-
     const grandTotal = courtTotal + serviceTotal;
 
     // 1️⃣ UPDATE BOOKING
