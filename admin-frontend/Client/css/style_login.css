@@ -3,7 +3,7 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-image: url('/Client/images/img_Slider.webp');
+    background-image: url('/admin-frontend/Client/images/img_Slider.webp');
     background-size: cover;
     font-family: Inter, sans-serif
 }

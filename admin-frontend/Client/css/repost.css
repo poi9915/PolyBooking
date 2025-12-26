@@ -159,7 +159,7 @@
 /* 6) Độ tương phản tiêu đề, tránh chữ trắng bị "mất" khi background có ảnh */
 .page-title h1,
 .page-title p {
-    color: white; /* chuyển từ trắng sang màu văn bản chung, an toàn hơn trên background ảnh */
+    color: var(--text-color); /* chuyển từ trắng sang màu văn bản chung, an toàn hơn trên background ảnh */
 }
 /* ================================
    FIX LỆCH DÒNG – LỆCH TIÊU ĐỀ

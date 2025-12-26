@@ -13,7 +13,7 @@ function displayMessage(text) {
 // Tạo hàm chuyển hướng mới
 function handleManualRedirect(userRole) {
     if (userRole === 'admin') {
-        window.location.href = 'court.html';
+        window.location.href = 'venues.html';
     } else if (userRole === 'employee') {
         window.location.href = 'staff_booking.html';
     } 
