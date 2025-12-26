@@ -13,14 +13,14 @@ function displayMessage(text) {
 // Tạo hàm chuyển hướng mới
 function handleManualRedirect(userRole) {
     if (userRole === 'admin') {
-        window.location.href = 'venues.html';
+        window.location.href = 'court.html';
     } else if (userRole === 'employee') {
         window.location.href = 'staff_booking.html';
     } 
 }
 
 // -------------------------------------------------------------------
-//  HÀM MỚI: Lấy vai trò (ROLE) của người dùng từ bảng super_users
+// 🔥 HÀM MỚI: Lấy vai trò (ROLE) của người dùng từ bảng super_users
 // -------------------------------------------------------------------
 // async function fetchUserRole(userId) {
 //     // Truy vấn bảng 'super_users' (tên bảng bạn dùng để lưu vai trò)
@@ -52,40 +52,37 @@ function handleManualRedirect(userRole) {
 // }
 
 // -------------------------------------------------------------------
-//  HÀM SIGN IN : Bắt đầu quá trình lấy vai trò
+// 🔥 HÀM SIGN IN : Bắt đầu quá trình lấy vai trò
 // -------------------------------------------------------------------
 // Thay đổi hàm signIn
 async function signIn(email, password) {
-    displayMessage('Đang kiểm tra thông tin người dùng...');
-    
-    //  THAY THẾ: TRUY VẤN TRỰC TIẾP BẢNG super_users ĐỂ TÌM EMAIL VÀ MẬT KHẨU
-    const { data: user, error: dbError } = await supabaseClient
-        .from('super_users')
-        .select(`id, email, role`) // Chỉ lấy các trường cần thiết
-        .eq('email', email)
-        .eq('password', password) //  KIỂM TRA MẬT KHẨU PLAIN TEXT! (NGUY HIỂM)
-        .single();
+  displayMessage('Đang kiểm tra thông tin người dùng...');
 
-    if (dbError || !user) {
-        // Nếu không tìm thấy user nào khớp với email và password
-        displayMessage(`Lỗi Đăng nhập: Sai Email hoặc Mật khẩu.`);
-        return;
-    }
-    
-    // Nếu truy vấn thành công, người dùng đã được "xác thực"
-    const userEmail = user.email;
-    displayMessage(`Đăng nhập thành công! Đang kiểm tra quyền truy cập...`);
+  const { data: user, error } = await supabaseClient
+    .from('super_users')
+    .select('id, email, username, full_name, role, _venue_id')
+    .eq('email', email)
+    .eq('password', password)
+    .single();
 
-    // Lưu Vai trò và User ID thủ công
-    localStorage.setItem('user_role', user.role);
-    localStorage.setItem('user_id', user.id); // LƯU ID USER THỦ CÔNG
+  if (error || !user) {
+    displayMessage('Sai Email hoặc Mật khẩu');
+    return;
+  }
 
-    // GỌI HÀM LẤY VAI TRÒ VÀ CHUYỂN HƯỚNG
-    // (Bây giờ fetchUserRole chỉ cần đọc từ localStorage hoặc gọi hàm chuyển hướng trực tiếp)
-    
-    // Tạo hàm chuyển hướng đơn giản mới
-    handleManualRedirect(user.role);
+  // 🔥 LƯU DUY NHẤT 1 KEY
+  localStorage.setItem("super_users", JSON.stringify(user));
+
+  displayMessage("Đăng nhập thành công!");
+
+  // 🔁 CHUYỂN HƯỚNG
+  if (user.role === "admin") {
+    window.location.href = "venues.html";   // hoặc admin.html
+  } else {
+    window.location.href = "staff_booking.html";
+  }
 }
+
 
 // su kien lang nghe form (Giữ nguyên)
 loginForm.addEventListener('submit', async (e) => {

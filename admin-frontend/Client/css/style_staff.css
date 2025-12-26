@@ -222,116 +222,6 @@ body {
     color: var(--text-color);
 }
 
-/* ------------------ LỊCH CA (Schedule Grid) ------------------ */
-#schedule-content {
-    display: none;
-}
-
-/* Mặc định ẩn */
-
-.schedule-table-container {
-    overflow-x: auto;
-}
-
-.schedule-grid {
-    display: grid;
-    grid-template-columns: 180px repeat(7, 1fr);
-    border: 1px solid var(--border-color);
-    margin-top: 15px;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.schedule-header-cell {
-    background-color: var(--primary-color);
-    color: white;
-    padding: 12px 10px;
-    font-weight: 700;
-    text-align: center;
-    border-right: 1px solid rgba(255, 255, 255, 0.2);
-    border-bottom: 2px solid var(--border-color);
-}
-
-.schedule-header-cell:last-child {
-    border-right: none;
-}
-
-.employee-col {
-    text-align: left;
-    position: sticky;
-    left: 0;
-    z-index: 20;
-    background-color: var(--primary-color);
-}
-
-.employee-name-cell {
-    background-color: #f1f5f9;
-    color: var(--text-color);
-    padding: 15px 10px;
-    font-weight: 600;
-    border-bottom: 1px solid var(--border-color);
-    border-right: 2px solid #c0c0c0;
-    position: sticky;
-    left: 0;
-    z-index: 10;
-}
-
-.shift-cell {
-    padding: 10px;
-    text-align: center;
-    background-color: var(--surface-color);
-    border-bottom: 1px solid var(--border-color);
-    border-right: 1px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.shift-cell:last-child {
-    border-right: none;
-}
-
-/* .weekend {
-    background-color: #ffcdcd !important;
-} */
-
-.schedule-header-cell.weekend {
-    background-color: #ffc107;
-    color: var(--text-color);
-}
-
-.shift-badge {
-    padding: 5px 10px;
-    border-radius: 5px;
-    font-size: 13px;
-    font-weight: 600;
-    color: white;
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.shift-morning {
-    background-color: #007bff;
-}
-
-.shift-afternoon {
-    background-color: #17a2b8;
-}
-
-.shift-night {
-    background-color: #6c757d;
-}
-
-.shift-full {
-    background-color: #28a745;
-}
-
-.shift-dayoff {
-    background-color: #dc3545;
-}
-
 /* ------------------ THÔNG BÁO (Notifications) ------------------ */
 
 .notification-list {
@@ -515,6 +405,25 @@ body {
 .btn-secondary {
     background-color: #6c757d !important;
     border-radius: 12px;
+}
+
+.btn-dichvu {
+    background-color: #3ba112 !important;
+    border-radius: 12px;
+    padding: 6px 18px;   /* giảm padding dọc */
+    color: #fff;
+    font-size: 15px;     /* chữ nhỏ hơn chút */
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    height: 40px;        /* chiều cao nhỏ lại */
+    line-height: 1;
+    transition: all 0.2s ease;
+    margin-top: 24px;
+}
+
+.btn-dichvu:hover {
+    background-color: #2f860e !important;
 }
 
 /* INPUT */
@@ -765,7 +674,6 @@ input, select, textarea {
     font-weight: 700;
     color: #6c757d;
 }
-
 /* PHẦN THANH TOÁN */
 #editBookingModal .form-section:last-of-type {
     background: linear-gradient(135deg, #fff3cd, #fff8e1);
@@ -826,6 +734,7 @@ input, select, textarea {
     transform: translateY(-1px);
     box-shadow: 0 6px 14px rgba(0,0,0,.2);
 }
+
 .booking-block {
     display: flex;
     flex-direction: column;
@@ -893,4 +802,165 @@ input, select, textarea {
 .profile-info .logout-btn:active {
     transform: translateY(0);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Overlay nền mờ */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(3px);
+    z-index: 9999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.25s ease;
+}
+
+/* Khung modal */
+.modal-content {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px 22px;
+    width: 100%;
+    max-width: 700px;
+
+    box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+    animation: slideUp 0.3s ease;
+}
+
+/* Tiêu đề */
+.modal-content h3 {
+    text-align: center;
+    margin-bottom: 18px;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+/* Bảng dịch vụ */
+.modal-content table {
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.modal-content thead {
+    background: linear-gradient(135deg, #3ba112, #2f8c0d);
+    color: #fff;
+}
+
+.modal-content th,
+.modal-content td {
+    vertical-align: middle;
+    text-align: center;
+    padding: 10px;
+}
+
+.modal-content tbody tr:hover {
+    background: #f4fdf0;
+}
+
+/* Giá tiền */
+.modal-content td:nth-child(2) {
+    font-weight: 600;
+    color: #27ae60;
+}
+
+/* Nút chọn dịch vụ */
+.btn-dichvu {
+    background: #3ba112;
+    border: none;
+    border-radius: 10px;
+    padding: 6px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.btn-dichvu:hover {
+    background: #2f8c0d;
+    transform: scale(1.05);
+}
+
+/* Khu vực nút đóng */
+.form-actions {
+    text-align: center;
+    margin-top: 16px;
+}
+
+/* Nút đóng */
+.btn-secondary {
+    background: #e0e0e0;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 22px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.btn-secondary:hover {
+    background: #cfcfcf;
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(40px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.btn-dichvu-edit {
+    margin-top: 16px;
+    width: 100%;
+
+    background: linear-gradient(135deg, #3ba112, #2f8c0d);
+    color: #ffffff;
+
+    border: none;
+    border-radius: 14px;
+    padding: 12px 0;
+
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(59, 161, 18, 0.35);
+
+    transition: all 0.25s ease;
+}
+
+/* Hover */
+.btn-dichvu-edit:hover {
+    background: linear-gradient(135deg, #2f8c0d, #256f0b);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(59, 161, 18, 0.45);
+}
+
+/* Active (khi click) */
+.btn-dichvu-edit:active {
+    transform: translateY(0);
+    box-shadow: 0 6px 14px rgba(59, 161, 18, 0.3);
+}
+
+/* Disabled (nếu có) */
+.btn-dichvu-edit:disabled {
+    background: #b9d8a8;
+    cursor: not-allowed;
+    box-shadow: none;
+    opacity: 0.7;
 }
