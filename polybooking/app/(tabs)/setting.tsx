@@ -118,7 +118,7 @@ export default function Setting() {
                     upsert: true,
                     contentType: contentType,
                 });
-                if (uploadError) throw uploadError;
+                if (uploadError) console.log(uploadError) ;
                 const { data: urlData } = supabase.storage.from('Data').getPublicUrl(filePath);
                 newAvatarPath = `${urlData.publicUrl}?t=${new Date().getTime()}`;
             } catch (uploadError: any) {

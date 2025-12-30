@@ -29,22 +29,28 @@ type BookingWithDetails = Tables<'bookings'> & {
 
 // Bảng màu cho các trạng thái, sử dụng hex-code để tương thích với StyleSheet
 const statusColors: Record<string, string> = {
-    pending: '#facc15', // yellow-400
-    confirmed: '#3b82f6', // blue-500
-    paid: '#22c55e', // green-500
-    cancelled: '#ef4444', // red-500
+    pending: '#facc15',            // yellow-400
+    confirmed: '#3b82f6',          // blue-500
+    paid: '#22c55e',               // green-500
+    checked_in: '#14b8a6',         // teal-500
+    checked_in_completed: '#0f766e', // teal-700
+    cancelled: '#ef4444',          // red-500
     refund_requested: '#F97316FF', // orange-500
-    completed: '#9ca3af', // gray-400
+    completed: '#9ca3af',          // gray-400
 };
 
 const statusTranslations: Record<string, string> = {
     pending: 'Chờ xử lý',
     confirmed: 'Đã xác nhận',
     paid: 'Đã thanh toán',
+    checked_in: 'Đợi check in ',
+    checked_in_completed: 'Đã check in',
     cancelled: 'Đã hủy',
     refund_requested: 'Yêu cầu hoàn tiền',
     completed: 'Đã hoàn thành',
 };
+
+
 
 const BookingScreen = () => {
     const { profile } = useAuthStore();
