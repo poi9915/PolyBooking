@@ -74,7 +74,14 @@ export default function HomeScreen() {
     const handleFilterPress = (filter: FilterType) => {
         setActiveFilter((prevFilter) => (prevFilter === filter ? null : filter));
     };
-
+    const timeToMinutes = (time: string): number => {
+        const [h, m] = time.split(":").map(Number);
+        return h * 60 + m;
+    };
+    const nowMinutes = (() => {
+        const now = new Date();
+        return now.getHours() * 60 + now.getMinutes();
+    })();
     const processedVenues = useMemo(() => {
         // 1. Apply search query first
         let processed = venuesWithDistance.filter((venue) => {
@@ -85,6 +92,7 @@ export default function HomeScreen() {
                 venue.address?.toLowerCase().includes(query)
             );
         });
+
 
         // 2. Apply active filter/sort
         if (activeFilter) {
@@ -105,10 +113,21 @@ export default function HomeScreen() {
                     processed.sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
                     break;
                 case "OPEN_NOW":
-                    // This is a placeholder logic. You should replace it with your actual opening hours logic.
-                    // For example, check if current time is within venue's opening hours.
-                    // Here, we'll just filter for venues that have a specific (mock) property.
-                    processed = processed.filter((venue) => venue.id % 2 === 0); // Mock: only even IDs are "open"
+                    processed.sort((a, b) => {
+                        const aOpen =
+                            a.open_time && a.close_time
+                                ? timeToMinutes(a.open_time) <= nowMinutes &&
+                                nowMinutes <= timeToMinutes(a.close_time)
+                                : false;
+
+                        const bOpen =
+                            b.open_time && b.close_time
+                                ? timeToMinutes(b.open_time) <= nowMinutes &&
+                                nowMinutes <= timeToMinutes(b.close_time)
+                                : false;
+                        if (aOpen === bOpen) return 0;
+                        return aOpen ? -1 : 1;
+                    });
                     break;
             }
         }

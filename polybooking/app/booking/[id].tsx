@@ -1,35 +1,37 @@
-import { Box } from "@/components/ui/box";
-import { Button, ButtonText } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { FormControl, FormControlLabel, FormControlLabelText } from "@/components/ui/form-control";
-import { Heading } from "@/components/ui/heading";
-import { HStack } from '@/components/ui/hstack';
-import { CalendarDaysIcon, CircleIcon, ClockIcon } from "@/components/ui/icon";
-import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
-import { Radio, RadioGroup, RadioIcon, RadioIndicator, RadioLabel } from "@/components/ui/radio";
-import { Slider, SliderFilledTrack, SliderThumb, SliderTrack } from "@/components/ui/slider";
-import { Text } from "@/components/ui/text";
-import { VStack } from "@/components/ui/vstack";
-import { useAuthStore } from "@/store/useAuthStore";
-import { useBookingStore } from "@/store/useBookingStore";
-import { useVenueStore } from "@/store/useVenueStore";
-import { Court } from "@/types/store.type";
-import { supabase } from "@/utils/supabase";
-import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
-import { Image } from 'expo-image';
+import {Box} from "@/components/ui/box";
+import {Button, ButtonText} from "@/components/ui/button";
+import {Card} from "@/components/ui/card";
+import {FormControl, FormControlLabel, FormControlLabelText} from "@/components/ui/form-control";
+import {Heading} from "@/components/ui/heading";
+import {HStack} from '@/components/ui/hstack';
+import {CalendarDaysIcon, CircleIcon, ClockIcon, InfoIcon} from "@/components/ui/icon";
+import {Input, InputField, InputIcon, InputSlot} from "@/components/ui/input";
+import {Radio, RadioGroup, RadioIcon, RadioIndicator, RadioLabel} from "@/components/ui/radio";
+import {Slider, SliderFilledTrack, SliderThumb, SliderTrack} from "@/components/ui/slider";
+import {Text} from "@/components/ui/text";
+import {VStack} from "@/components/ui/vstack";
+import {useAuthStore} from "@/store/useAuthStore";
+import {useBookingStore} from "@/store/useBookingStore";
+import {useVenueStore} from "@/store/useVenueStore";
+import {Court} from "@/types/store.type";
+import {supabase} from "@/utils/supabase";
+import DateTimePicker, {DateTimePickerEvent} from '@react-native-community/datetimepicker';
+import {Image} from 'expo-image';
 import * as Linking from 'expo-linking';
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { WebView } from 'react-native-webview';
+import {useLocalSearchParams, useRouter} from "expo-router";
+import {useEffect, useState} from "react";
+import {Pressable, ScrollView, StyleSheet, View} from "react-native";
+import {SafeAreaView} from "react-native-safe-area-context";
+import {WebView} from 'react-native-webview';
+import {parseTime} from "@/utils/parseTime";
+import {Alert, AlertIcon, AlertText} from "@/components/ui/alert";
 
 // Các mốc thời gian cho slider (tính bằng phút)
 const DURATION_STEPS = [60, 90, 120, 150, 180];
 
 export default function BookingScreen() {
     const router = useRouter();
-    const { id: venueId } = useLocalSearchParams();
+    const {id: venueId} = useLocalSearchParams();
 
     // State cho UI
     const [showDatePicker, setShowDatePicker] = useState(false);
@@ -39,8 +41,8 @@ export default function BookingScreen() {
     const [bookedCourtIds, setBookedCourtIds] = useState<number[]>([]);
 
     // Lấy state và actions từ stores
-    const { session } = useAuthStore();
-    const { activeVenue, courts, fetchVenueById, fetchCourts } = useVenueStore();
+    const {session} = useAuthStore();
+    const {activeVenue, courts, fetchVenueById, fetchCourts} = useVenueStore();
     const {
         selectedCourt,
         selectedDate,
@@ -87,7 +89,7 @@ export default function BookingScreen() {
 
             const bookedStatuses = ['pending', 'confirmed', 'paid'];
 
-            const { data, error } = await supabase
+            const {data, error} = await supabase
                 .from('bookings')
                 .select('court_id')
                 .in('court_id', courtIds)
@@ -113,15 +115,34 @@ export default function BookingScreen() {
                 newStartTime.setHours(startTime.getHours());
                 newStartTime.setMinutes(startTime.getMinutes());
             }
-            useBookingStore.setState({ selectedDate: date, startTime: newStartTime });
+            useBookingStore.setState({selectedDate: date, startTime: newStartTime});
         }
+    };
+
+
+    const MIN_TIME = parseTime(activeVenue?.open_time ?? '06:30:00')
+    const MAX_TIME = parseTime(activeVenue?.close_time ?? '22:30:00')
+    const clampTime = (date: Date) => {
+        const min = new Date(date);
+        min.setHours(MIN_TIME.hour, MIN_TIME.minute, 0, 0);
+
+        const max = new Date(date);
+        max.setHours(MAX_TIME.hour, MAX_TIME.minute, 0, 0);
+
+        if (date < min) return min;
+        if (date > max) return max;
+        return date;
     };
 
     const onTimeChange = (event: DateTimePickerEvent, date?: Date) => {
         setShowTimePicker(false);
-        if (date) {
-            useBookingStore.setState({ startTime: date });
-        }
+        if (event.type === "dismissed" || !date) return;
+        console.log(`Time : ${MIN_TIME} ||| ${MAX_TIME}`)
+        const fixedDate = clampTime(date);
+        if (!date) return;
+        console.log(`${activeVenue?.open_time}`)
+        useBookingStore.setState({startTime: fixedDate});
+
     };
 
     const handleDurationChange = (value: number) => {
@@ -142,7 +163,7 @@ export default function BookingScreen() {
 
         try {
             console.log("Invoking 'create-payment-link' function...");
-            const { data, error } = await supabase.functions.invoke('payos-gen-link', {
+            const {data, error} = await supabase.functions.invoke('payos-gen-link', {
                 body: {
                     court: selectedCourt,
                     startTime: startTime.toISOString(),
@@ -172,7 +193,7 @@ export default function BookingScreen() {
     // Lắng nghe deep link để xử lý khi quay lại từ app thanh toán
     useEffect(() => {
         const handleDeepLink = (event: { url: string }) => {
-            const { url } = event;
+            const {url} = event;
             if (url.includes('success')) {
                 setPaymentUrl(null); // Đóng WebView
                 router.replace('/success');
@@ -198,9 +219,9 @@ export default function BookingScreen() {
             <SafeAreaView style={styles.container}>
                 <WebView
                     originWhitelist={['*', 'polybooking://*']}
-                    source={{ uri: paymentUrl }}
+                    source={{uri: paymentUrl}}
                     onShouldStartLoadWithRequest={(event) => {
-                        const { url } = event;
+                        const {url} = event;
                         console.log('WebView is trying to load:', url);
 
                         // Kiểm tra nếu URL là deep link 
@@ -233,18 +254,18 @@ export default function BookingScreen() {
                         <Card className="shadow-md rounded-lg overflow-hidden" style={styles.fabCardItem}>
                             <Box className="h-24">
                                 <Image
-                                    style={{ flex: 1 }}
-                                    source={{ uri: activeVenue.images?.[0] || 'https://via.placeholder.com/400x150' }}
+                                    style={{flex: 1}}
+                                    source={{uri: activeVenue.images?.[0] || 'https://via.placeholder.com/400x150'}}
                                     className="absolute w-full h-full"
                                     contentFit="cover"
                                     alt={activeVenue.name}
                                 />
-                                <Box className="absolute inset-0 bg-black/40" />
+                                <Box className="absolute inset-0 bg-black/40"/>
                                 <VStack className="absolute bottom-0 left-0 p-6">
-                                    <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 12 }} size="xs">Địa
+                                    <Text style={{color: 'white', fontWeight: 'bold', fontSize: 12}} size="xs">Địa
                                         điểm</Text>
-                                    <Heading style={{ color: 'white', fontWeight: 'bold' }}
-                                        size="md">{activeVenue.name}</Heading>
+                                    <Heading style={{color: 'white', fontWeight: 'bold'}}
+                                             size="md">{activeVenue.name}</Heading>
                                 </VStack>
                             </Box>
                         </Card>
@@ -258,8 +279,8 @@ export default function BookingScreen() {
                                     ngày</FormControlLabelText></FormControlLabel>
                                 <Pressable onPress={() => setShowDatePicker(true)}>
                                     <Input isReadOnly pointerEvents="none">
-                                        <InputField value={selectedDate.toLocaleDateString('vi-VN')} />
-                                        <InputSlot><InputIcon as={CalendarDaysIcon} className="mr-2" /></InputSlot>
+                                        <InputField value={selectedDate.toLocaleDateString('vi-VN')}/>
+                                        <InputSlot><InputIcon as={CalendarDaysIcon} className="mr-2"/></InputSlot>
                                     </Input>
                                 </Pressable>
                             </FormControl>
@@ -271,13 +292,18 @@ export default function BookingScreen() {
                                         <InputField value={startTime ? startTime.toLocaleTimeString('vi-VN', {
                                             hour: '2-digit',
                                             minute: '2-digit'
-                                        }) : 'Chọn giờ'} />
-                                        <InputSlot><InputIcon as={ClockIcon} className="mr-2" /></InputSlot>
+                                        }) : 'Chọn giờ'}/>
+                                        <InputSlot><InputIcon as={ClockIcon} className="mr-2"/></InputSlot>
                                     </Input>
                                 </Pressable>
                             </FormControl>
                         </VStack>
                     </Card>
+                    <Alert className="p-4 shadow-md" action='warning' variant='solid'>
+                        <AlertIcon as={InfoIcon}/>
+                        <AlertText>Sân mở cửa vào {MIN_TIME.hour}:{MIN_TIME.minute.toString().padStart(2, '0')} và đóng
+                            cửa vào {MAX_TIME.hour}:{MAX_TIME.minute.toString().padStart(2, '0')}</AlertText>
+                    </Alert>
 
                     {/* Card 2: Chọn thời lượng */}
                     <Card className="p-4 shadow-md" style={styles.fabCardItem}>
@@ -294,8 +320,8 @@ export default function BookingScreen() {
                                     onChange={handleDurationChange}
                                     className="w-[90%]"
                                 >
-                                    <SliderTrack><SliderFilledTrack /></SliderTrack>
-                                    <SliderThumb />
+                                    <SliderTrack><SliderFilledTrack/></SliderTrack>
+                                    <SliderThumb/>
                                 </Slider>
                                 <HStack className="w-[90%] justify-between">
                                     {DURATION_STEPS.map((duration) => (
@@ -318,15 +344,19 @@ export default function BookingScreen() {
                             }}>
                                 <VStack space="md" className="pt-2">
                                     {courts.map(court => (
-                                        <Card key={court.id} className={`p-3 shadow-sm ${bookedCourtIds.includes(court.id) ? 'bg-gray-200' : 'bg-gray-50'}`}>
+                                        <Card key={court.id}
+                                              className={`p-3 shadow-sm ${bookedCourtIds.includes(court.id) ? 'bg-gray-200' : 'bg-gray-50'}`}>
                                             <Radio
                                                 value={court.id.toString()}
                                                 size="md"
                                                 isDisabled={bookedCourtIds.includes(court.id)}
                                             >
-                                                <RadioIndicator><RadioIcon as={CircleIcon} /></RadioIndicator>
-                                                <RadioLabel className={`${bookedCourtIds.includes(court.id) ? 'text-gray-400' : ''}`}>{court.name} - {court.default_price_per_hour.toLocaleString('vi-VN')}đ/h</RadioLabel>
-                                                {bookedCourtIds.includes(court.id) && <Text size="xs" className="text-red-500 ml-10 -mt-1">Đã được đặt</Text>}
+                                                <RadioIndicator><RadioIcon as={CircleIcon}/></RadioIndicator>
+                                                <RadioLabel
+                                                    className={`${bookedCourtIds.includes(court.id) ? 'text-gray-400' : ''}`}>{court.name} - {court.default_price_per_hour.toLocaleString('vi-VN')}đ/h</RadioLabel>
+                                                {bookedCourtIds.includes(court.id) &&
+                                                    <Text size="xs" className="text-red-500 ml-10 -mt-1">Đã được
+                                                        đặt</Text>}
                                             </Radio>
                                         </Card>
                                     ))}
@@ -364,10 +394,10 @@ export default function BookingScreen() {
                         <Text size="xl" bold>{totalPrice.toLocaleString('vi-VN')}đ</Text>
                     </View>
                     <View style={styles.buttonGroup}>
-                        <Button variant="outline" action="secondary" onPress={() => router.back()} style={{ flex: 1 }}>
+                        <Button variant="outline" action="secondary" onPress={() => router.back()} style={{flex: 1}}>
                             <ButtonText>Huỷ bỏ</ButtonText>
                         </Button>
-                        <Button onPress={handlePayment} style={{ flex: 1 }}>
+                        <Button onPress={handlePayment} style={{flex: 1}}>
                             <ButtonText>Thanh Toán</ButtonText>
                         </Button>
                     </View>
@@ -378,8 +408,8 @@ export default function BookingScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: 'white' },
-    scrollContent: { paddingBottom: 150 }, // Thêm padding để nội dung không bị FAB che
+    container: {flex: 1, backgroundColor: 'white'},
+    scrollContent: {paddingBottom: 150}, // Thêm padding để nội dung không bị FAB che
     fabContainer: {
         position: 'absolute',
         bottom: 0,
@@ -394,7 +424,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         elevation: 8,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: -4 },
+        shadowOffset: {width: 0, height: -4},
         shadowOpacity: 0.1,
         shadowRadius: 8,
     },
@@ -404,7 +434,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         elevation: 4,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: -4 },
+        shadowOffset: {width: 0, height: -4},
         shadowOpacity: 0.1,
         shadowRadius: 4,
     },

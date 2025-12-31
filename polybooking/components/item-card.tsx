@@ -1,13 +1,13 @@
-import { Button, ButtonText } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Heading } from "@/components/ui/heading";
-import { HStack } from "@/components/ui/hstack";
-import { Text } from "@/components/ui/text";
-import { VStack } from "@/components/ui/vstack";
-import { usePlusCodeDistance } from "@/hooks/use-plus-code-distance";
-import { Venue } from "@/types/store.type";
-import { Image } from "expo-image";
-import { Pressable, StyleSheet } from "react-native";
+import {Button, ButtonText} from "@/components/ui/button";
+import {Card} from "@/components/ui/card";
+import {Heading} from "@/components/ui/heading";
+import {HStack} from "@/components/ui/hstack";
+import {Text} from "@/components/ui/text";
+import {VStack} from "@/components/ui/vstack";
+import {usePlusCodeDistance} from "@/hooks/use-plus-code-distance";
+import {Venue} from "@/types/store.type";
+import {Image} from "expo-image";
+import {Pressable, StyleSheet} from "react-native";
 
 interface ItemCardProps {
     item: Venue;
@@ -19,9 +19,9 @@ interface VenueWithDistance extends Venue {
 }
 
 export default function ItemCard({
-    item,
-    onPress,
-}: ItemCardProps) {
+                                     item,
+                                     onPress,
+                                 }: ItemCardProps) {
     const imageURL = item.images?.[0];
 
     const rating = item.rating || 0;
@@ -33,16 +33,34 @@ export default function ItemCard({
 
     // Use pre-calculated distance if available, otherwise use the hook as a fallback
     const precalculatedDistance = (item as VenueWithDistance).distance;
-    const { distanceText: hookDistanceText } = usePlusCodeDistance(item.location_code, precalculatedDistance);
+    const {distanceText: hookDistanceText} = usePlusCodeDistance(item.location_code, precalculatedDistance);
     const distanceText = precalculatedDistance !== undefined
         ? (precalculatedDistance < 1
             ? `${Math.round(precalculatedDistance * 1000)} m`
             : `${precalculatedDistance.toFixed(1)} km`)
         : hookDistanceText;
 
+    const timeToMinutes = (time: string) => {
+        const [h, m] = time.split(":").map(Number);
+        return h * 60 + m;
+    };
+
+    const isOpenNow = (open?: string | null, close?: string | null) => {
+        if (!open || !close) return false;
+
+        const now = new Date();
+        const nowMin = now.getHours() * 60 + now.getMinutes();
+
+        const openMin = timeToMinutes(open);
+        const closeMin = timeToMinutes(close);
+
+        return openMin <= nowMin && nowMin <= closeMin;
+    };
+    const openNow = isOpenNow(item.open_time, item.close_time);
+
 
     return (
-        <Pressable onPress={() => onPress(item)} style={{ width: "100%" }}>
+        <Pressable onPress={() => onPress(item)} style={{width: "100%"}}>
             <Card style={styles.card}>
                 <HStack space="md" style={styles.container}>
 
@@ -55,7 +73,7 @@ export default function ItemCard({
                     />
 
                     {/* INFO */}
-                    <VStack style={{ flex: 1 }} space="sm">
+                    <VStack style={{flex: 1}} space="sm">
                         <Heading size="md" numberOfLines={1}>
                             {item.name}
                         </Heading>
@@ -81,14 +99,26 @@ export default function ItemCard({
                         <Text className="font-bold text-lg text-[#0A401E]">
                             {price} / giờ
                         </Text>
+                        <HStack className="items-center space-x-2 mt-1">
+                            <Button
+                                size="sm"
+                                className="bg-[#0A401E] rounded-xl w-[90px]"
+                                onPress={() => onPress(item)}
+                            >
+                                <ButtonText className="text-white text-xs">Details</ButtonText>
+                            </Button>
 
-                        <Button
-                            size="sm"
-                            className="bg-[#0A401E] rounded-xl w-[90px] mt-1"
-                            onPress={() => onPress(item)}
-                        >
-                            <ButtonText className="text-white text-xs">Details</ButtonText>
-                        </Button>
+                            <Text
+                                size="xs"
+                                className={`m-5 font-bold ${
+                                    openNow ? "text-green-600" : "text-red-500"
+                                }`}
+                            >
+                                {openNow ? "🟢 Đang mở cửa" : "🔴 Đã đóng cửa"}
+                            </Text>
+                        </HStack>
+
+
                     </VStack>
                 </HStack>
             </Card>
@@ -111,7 +141,7 @@ const styles = StyleSheet.create({
         shadowColor: "#000",
         shadowOpacity: 0.1,
         shadowRadius: 6,
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: {width: 0, height: 2},
     },
     imageStyle: {
         width: 140,
