@@ -363,6 +363,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     bookings = data || [];
     renderBookingGrid();
   }
+
   // ------------ RENDER BOOKINGS --------------
   function renderBookingGrid() {
     if (!allVenuesContainer) return;
@@ -418,7 +419,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         let bg = "#4CAF50";          // default (pending)
         if (b.status === "confirmed") bg = "#2196F3";
         if (b.status === "paid") bg = "#9C27B0";
-        if (b.status === "checked_in") bg = "#FF9800";   // màu cam check-in
+        if (b.status === "checked_in_completed") bg = "#FF9800"; // cam: đã check-in
         if (b.status === "cancelled") bg = "#9E9E9E";
         block.style.background = bg;
         block.style.color = "#fff";
@@ -750,19 +751,26 @@ document.addEventListener("DOMContentLoaded", async () => {
   // =====================================================
   // CHECK-IN
   // =====================================================
+  
   async function checkInBooking() {
     if (!editingBooking) return;
+    if (editingBooking.status === "checked_in_completed") {
+      return alert("⛔ Đơn này đã check-in rồi");
+    }
     const { error } = await supabase
       .from("bookings")
       .update({
-        status: "checked_in"
+        status: "checked_in_completed"
       })
       .eq("id", editingBooking.id);
+
     if (error) return alert("❌ Lỗi check-in: " + error.message);
-    alert("🎉 Check-in thành công!");
+
+    alert("🎉 Đã check-in sân!");
     editModal.style.display = "none";
     await loadBookingsForDate(dateSelect.value);
   }
+
 
   // =====================================================
   // CREATE NEW BOOKING
