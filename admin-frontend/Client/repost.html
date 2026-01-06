@@ -21,8 +21,8 @@
                     <h1>Báo cáo & Thống kê</h1>
                     <p>Theo dõi hiệu suất doanh thu, sân và khách hàng.</p>
                 </div>
-                <div class="user-profile">
-                    <div class="profile-avatar">Admin</div>
+                <div class="profile-avatar">
+                    AD
                 </div>
             </header>
 
@@ -75,7 +75,7 @@
                     <div>
                         <div class="kpi-title">Tổng Doanh Thu</div>
                         <div class="kpi-value" id="total-money">0 đ</div>
-                        <div class="kpi-subtext growth">Cập nhật theo bộ lọc</div>
+                       
                     </div>
                 </div>
 
@@ -84,7 +84,7 @@
                     <div>
                         <div class="kpi-title">Tổng Số Giờ</div>
                         <div class="kpi-value" id="total-hours">0</div>
-                        <div class="kpi-subtext">Tính từ dữ liệu booking</div>
+                        
                     </div>
                 </div>
                 <!-- ⭐ THÊM MỚI: Tổng đơn thành công -->
@@ -93,7 +93,15 @@
                     <div>
                         <div class="kpi-title">Đơn Thành Công</div>
                         <div class="kpi-value" id="total-success">0</div>
-                        <div class="kpi-subtext">Đơn có trạng thái "hoàn thành"</div>
+                        
+                    </div>
+                </div>
+                <div class="kpi-card fail-kpi">
+                    <span class="kpi-icon"></span>
+                    <div>
+                        <div class="kpi-title">Đơn Thất Bại</div>
+                        <div class="kpi-value" id="total-fail">0</div>
+                        
                     </div>
                 </div>
 
@@ -134,7 +142,6 @@
 
         </div>
     </div>
-   
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="./js/loadSliderBar.js"></script>
     <script src="./js/client_config.js"></script>

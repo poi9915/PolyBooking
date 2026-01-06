@@ -122,8 +122,8 @@ function renderTable(list) {
         tr.innerHTML = `
         <td>${b.id}</td>
         <td>${b.email}</td>
-        <td class="${b.status === 'completed' ? 'status-success' : ''}">
-            ${b.status === 'completed' ? 'Hoàn thành' : b.status}
+        <td class="${b.status === 'completed' ? 'status-success' : b.status === 'cancelled' ? 'status-cancelled' : ''}">
+            ${b.status === 'completed' ? 'Hoàn thành' : b.status === 'cancelled' ? 'Đã hủy' : b.status}
         </td>
         <td>${b.venue_name}</td>
         <td>${formatDate(b.created_at)}</td>
@@ -135,18 +135,21 @@ function renderTable(list) {
         tbody.appendChild(tr);
     });
 
-    const totalHours = list.reduce((s, b) => s + calcHours(b.during.start, b.during.end), 0);
-    const totalMoney = list.reduce((s, b) => s + (b.price || 0), 0);
-    updateTotals(totalHours, totalMoney);
-    let totalSuccess = list.filter(b =>
-        ["completed"].includes(b.status)
-    ).length;
-    updateSuccessCancel(totalSuccess);
-    // let totalCancel = list.filter(b =>
-    //     ["Đã hủy"].includes(b.status)
-    // ).length;
+    const totalHours = list
+        .filter(b => b.status === "completed")
+        .reduce((s, b) => s + calcHours(b.during.start, b.during.end), 0);
 
-    // updateSuccessCancel(totalSuccess, totalCancel);
+    const totalMoney = list
+        .filter(b => b.status === "completed")
+        .reduce((s, b) => s + (b.price || 0), 0);
+    updateTotals(totalHours, totalMoney);
+    let totalSuccess = list.filter(b => b.status === "completed").length;
+    let totalFail = list.filter(b =>
+        ["cancelled", "failed"].includes(b.status)
+    ).length;
+
+    updateSuccessCancel(totalSuccess, totalFail);
+
 }
 function updateTotals(hours, money) {
     const elH = document.getElementById("total-hours");
@@ -154,12 +157,15 @@ function updateTotals(hours, money) {
     if (elH) elH.innerText = hours;
     if (elM) elM.innerText = formatMoney(money);
 }
-function updateSuccessCancel(successCount) {
+
+function updateSuccessCancel(successCount, failCount) {
     const elS = document.getElementById("total-success");
-    // const elC = document.getElementById("total-cancel");
+    const elF = document.getElementById("total-fail");
+
     if (elS) elS.innerText = successCount;
-    //     if (elC) elC.innerText = cancelCount;
+    if (elF) elF.innerText = failCount;
 }
+
 
 // ---------- BỘ LỌC ----------
 function filterToday(list) {
@@ -232,12 +238,14 @@ function applyFilters() {
     if (!allBookings) return;
 
     let list = allBookings.slice();
-    // LUÔN lọc chỉ lấy đơn completed
-    list = list.filter(b => b.status === "completed");
+
+    // ✅ CHỈ GIỮ 2 TRẠNG THÁI
+    list = list.filter(b =>
+        ["completed", "cancelled"].includes(b.status)
+    );
 
     const type = document.getElementById("filter-type")?.value || "none";
 
-    // --- Lọc theo thời gian ---
     if (type === "none") {
         list = filterToday(list);
     } else if (type === "date") {
@@ -248,11 +256,12 @@ function applyFilters() {
         list = filterByMonth(list);
     }
 
-    // --- Lọc theo khu vực ---
     list = filterByVenue(list);
 
     renderTable(list);
 }
+
+
 
 // ---------- INIT ----------
 let allBookings = [];
@@ -291,7 +300,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.getElementById("filter-type")?.addEventListener("change", onFilterTypeChange);
         document.getElementById("btn-refresh")?.addEventListener("click", applyFilters);
 
-      
+
     }
 });
 

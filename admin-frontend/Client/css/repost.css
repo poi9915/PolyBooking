@@ -209,12 +209,18 @@
 .success-kpi .kpi-value {
     color: #28a745; /* xanh lá */
 }
-
+.fail-kpi .kpi-value {
+    color: #dc3545; /* đỏ */
+}
 .cancel-kpi .kpi-value {
     color: #dc3545; /* đỏ */
 }
 .status-success {
     color: #0dbb39;
+    font-weight: 600;
+}
+.status-cancelled {
+    color: #dc3545;
     font-weight: 600;
 }
 .filter-group select,

@@ -31,8 +31,8 @@ async function loadAdminFromDB(userId) {
 
     document.getElementById("admin-email").value = data.email;
     document.getElementById("admin-username").value = data.username;
-    document.querySelector(".profile-avatar").innerText =
-        data.email.substring(0, 2).toUpperCase();
+    // document.querySelector(".profile-avatar").innerText =
+    //     data.email.substring(0, 2).toUpperCase();
 }
 
 document.addEventListener("DOMContentLoaded", fetchAdminAccount);
