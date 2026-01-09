@@ -93,7 +93,7 @@ async function deleteVenueAndCourts(venueId) {
 // /Client/js/venues_logic.js
 
 // Đổi tên hàm để chỉ rõ mục đích: tải danh sách cho dropdown
-async function loadVenuesForSelect() { 
+async function loadVenuesForSelect() {
     const { data: venues, error } = await supabaseClient
         .from('venues')
         .select('id, name, address, surface, images, contact_email, contact_phone, country, rating, province');
@@ -104,14 +104,14 @@ async function loadVenuesForSelect() {
     }
 
     allVenues = venues;
-    
+
     // 🚨 BƯỚC KHẮC PHỤC: Thêm kiểm tra Null cho dropdown
     const select = document.getElementById('venue-select');
     if (!select) {
         console.warn("Không tìm thấy dropdown 'venue-select'. Bỏ qua load Venue.");
         return;
     }
-    
+
     // Xóa tất cả option trừ option trống đầu tiên (nếu có)
     select.innerHTML = '<option value="">--- Chọn Khu Vực ---</option>';
 
@@ -204,8 +204,8 @@ async function loadVenues() {
     }
 
     renderVenuesList(venues);
-   
-    
+
+
 }
 
 /**
@@ -227,12 +227,12 @@ function renderVenuesList(venues) {
     venues.forEach(venue => {
         const isIndoorDisplay = venue.is_indoor ? 'Ngoài trời' : 'Trong nhà';
         const ratingDisplay = venue.rating ? venue.rating.toFixed(1) : 'N/A';
-        
+
         // --- SỬ DỤNG HÀM MỚI ĐỂ HIỂN THỊ ẢNH THAY VÌ ĐẾM ---
         const imageHtmlSnippet = createImagePreviewSnippet(venue.images);
         // --- END ---
-        
-        
+
+
         // const tempPrice = venue.price; 
 
         const row = `
@@ -245,7 +245,13 @@ function renderVenuesList(venues) {
                 <td>${venue.contact_phone || 'N/A'}</td>
                 <td>${venue.contact_email || 'N/A'}</td>
                 <td>${isIndoorDisplay}</td>
-                <td>${ratingDisplay}</td>
+                <td>${ratingDisplay}
+                    <button class="view-rating-btn"
+                        onclick="event.stopPropagation(); openRatingModal(${venue.id})">
+                            Xem đánh giá
+                    </button>
+
+                </td>
                 <td style="max-width: 70px;">${imageHtmlSnippet}</td> 
                 <td>
                     <button class="action-btn edit-venue-btn" data-id="${venue.id}">Sửa</button>
@@ -308,7 +314,7 @@ function createImagePreviewSnippet(imagesData) {
     if (urls.length === 0) return '<span style="color: #6c757d;">Không có ảnh</span>';
 
     // 2. Chỉ lấy tối đa 3 ảnh để hiển thị trong bảng
-    const displayUrls = urls.slice(0, 3); 
+    const displayUrls = urls.slice(0, 3);
 
     // 3. Tạo thẻ <img>
     const imageHtml = displayUrls.map(url => {
@@ -329,15 +335,15 @@ function setupVenueForm(mode = 'add', data = null) {
     const modalTitle = document.getElementById('venue-modal-title');
     const saveButton = document.getElementById('save-venue-details-btn');
     const deleteButton = document.getElementById('delete-venue-btn');
-    
+
     // THÊM: Lấy tham chiếu đến form và danh sách Sân
     const venueDetailsFieldset = document.getElementById('venue-details-fieldset');
     const courtListCard = document.getElementById('court-list-in-modal-card');
-    
+
     // Reset inputs
     document.getElementById('venue-name').value = '';
     document.getElementById('venue-address').value = '';
-    document.getElementById('venue-country').value = ''; 
+    document.getElementById('venue-country').value = '';
     document.getElementById('venue-surface').value = '';
     document.getElementById('venue-is-indoor').value = 'false';
     document.getElementById('venue-contact-email').value = '';
@@ -353,9 +359,9 @@ function setupVenueForm(mode = 'add', data = null) {
         currentVenueId = null; // Biến global trong venue_main.js
         modalTitle.textContent = "Thêm Khu Vực Mới";
         saveButton.textContent = "Tạo Khu Vực";
-        
+
         toggleVenueFields(false); // Bật tất cả input
-        
+
         // HIỆN form Venue, ẨN danh sách Sân
         if (venueDetailsFieldset) venueDetailsFieldset.style.display = 'block';
         if (courtListCard) courtListCard.style.display = 'none'; // Ẩn danh sách Sân khi Tạo mới
@@ -364,28 +370,28 @@ function setupVenueForm(mode = 'add', data = null) {
         currentVenueId = data.id; // Biến global trong venue_main.js
         modalTitle.textContent = `Quản lý Sân tại Khu Vực: ${data.name}`; // Đổi tiêu đề cho phù hợp
         saveButton.textContent = "Lưu Thay Đổi";
-       
+
 
         // Đổ dữ liệu (vẫn cần đổ dữ liệu để logic lưu hoạt động đúng)
         document.getElementById('venue-name').value = data.name || '';
         document.getElementById('venue-address').value = data.address || '';
-        document.getElementById('venue-country').value = data.province || ''; 
+        document.getElementById('venue-country').value = data.province || '';
         document.getElementById('venue-surface').value = data.surface || '';
         document.getElementById('venue-is-indoor').value = data.is_indoor ? 'true' : 'false';
         document.getElementById('venue-contact-email').value = data.contact_email || '';
         document.getElementById('venue-contact-phone').value = data.contact_phone || '';
-        
+
         // Hiển thị ảnh
-        renderImagePreview(data.images, 'venue-images-preview'); 
+        renderImagePreview(data.images, 'venue-images-preview');
         document.getElementById('venue-images-preview').dataset.currentUrls = data.images || '';
 
         toggleVenueFields(false); // Vẫn bật các input để logic lưu hoạt động (nếu người dùng bấm Lưu)
-        
+
         // ẨN form Venue, HIỆN danh sách Sân (theo yêu cầu của bạn)
-        if (venueDetailsFieldset) venueDetailsFieldset.style.display = 'none'; 
-        if (courtListCard) courtListCard.style.display = 'block'; 
+        if (venueDetailsFieldset) venueDetailsFieldset.style.display = 'none';
+        if (courtListCard) courtListCard.style.display = 'block';
     }
-    
+
     openVenueModal(); // Mở Modal
 }
 
@@ -397,7 +403,7 @@ async function loadVenueDetails(venueId) {
         alert("ID Khu Vực không hợp lệ.");
         return;
     }
-    
+
     // Tải dữ liệu chi tiết của Venue
     const { data, error } = await supabaseClient
         .from('venues')
@@ -414,7 +420,7 @@ async function loadVenueDetails(venueId) {
     if (data) {
         //  QUAN TRỌNG: Gọi setupVenueForm ở chế độ 'edit'
         setupVenueForm('edit', data);
-        
+
         //  BƯỚC MỚI: Tải danh sách Sân thuộc Venue này
         await loadCourtsByVenue(venueId);
     } else {
@@ -459,7 +465,7 @@ function renderVenuesForMasterList(venues) {
 async function fetchVenuesAndRenderTable() {
     const { data: venues, error } = await supabaseClient
         .from('venues')
-        .select('id, name, code_venues, address, province, surface, contact_email, contact_phone, images, rating'); 
+        .select('id, name, code_venues, address, province, surface, contact_email, contact_phone, images, rating');
 
     if (error) {
         console.error("Lỗi khi tải danh sách Khu vực:", error.message);
@@ -480,11 +486,11 @@ async function loadCourtsByVenue(venueId) {
     const tbody = document.getElementById("courts-by-venue-tbody");
     const addCourtBtn = document.getElementById("add-court-to-venue-btn");
     const courtListCard = document.getElementById("court-list-in-modal-card");
-    
+
     if (!tbody || !addCourtBtn || !courtListCard) return;
 
     // Hiển thị phần Danh sách Sân và nút Thêm Sân
-    courtListCard.style.display = 'block'; 
+    courtListCard.style.display = 'block';
     addCourtBtn.style.display = 'inline-block';
     addCourtBtn.dataset.venueId = venueId; // Lưu ID Venue để dùng khi thêm mới sân
 
@@ -500,7 +506,7 @@ async function loadCourtsByVenue(venueId) {
         .from("courts")
         .select("id, name, capacity, is_active, default_price_per_hour")
         .eq("venue_id", venueId);
-    
+
     if (filteredError) {
         tbody.innerHTML = `<tr><td colspan="5" style="color:red;">Lỗi tải dữ liệu sân!</td></tr>`;
         console.error(filteredError.message);
@@ -515,10 +521,10 @@ async function loadCourtsByVenue(venueId) {
     tbody.innerHTML = "";
 
     filteredCourts.forEach(court => {
-        const statusDisplay = court.is_active 
-            ? '<span class="status-active">Hoạt động</span>' 
+        const statusDisplay = court.is_active
+            ? '<span class="status-active">Hoạt động</span>'
             : '<span class="status-maintenance">Bảo trì</span>';
-            
+
         const priceDisplay = court.default_price_per_hour
             ? court.default_price_per_hour.toLocaleString('vi-VN') + ' VND'
             : 'N/A';
@@ -549,7 +555,7 @@ async function deleteCourt(courtId, venueId) {
     if (!confirm(`Bạn có chắc chắn muốn XÓA Sân ID: ${courtId} không?`)) {
         return;
     }
-    
+
     try {
         const { error } = await supabaseClient
             .from('courts')
@@ -559,7 +565,7 @@ async function deleteCourt(courtId, venueId) {
         if (error) throw error;
 
         alert(" Đã xóa Sân thành công!");
-        
+
         // Tải lại danh sách Sân trong Modal Venue
         await loadCourtsByVenue(venueId);
 
@@ -578,14 +584,14 @@ async function deleteCourt(courtId, venueId) {
 function setupCourtFormForAdd(venueId) {
     const modalTitle = document.getElementById('court-modal-title');
     const saveButton = document.getElementById('save-court-details-btn');
-    
+
     // ... (logic cũ) ...
-    
+
     // Reset ảnh
     const imageInput = document.getElementById('court-image-upload');
     if (imageInput) imageInput.value = '';
     document.getElementById('court-images-preview').innerHTML = '';
-    document.getElementById('court-images-preview').dataset.currentUrls = ''; 
+    document.getElementById('court-images-preview').dataset.currentUrls = '';
 
     // 2. Cập nhật tiêu đề & nút
     modalTitle.textContent = "Thêm Sân Mới";
@@ -631,9 +637,9 @@ async function loadCourtDetails(courtId) {
     document.getElementById('court-capacity').value = court.capacity || 2;
     document.getElementById('court-price').value = court.default_price_per_hour || '';
     document.getElementById('court-is-active').value = court.is_active ? 'true' : 'false';
-    
+
     // Hiển thị ảnh
-    renderImagePreview(court.image_url, 'court-images-preview'); 
+    renderImagePreview(court.image_url, 'court-images-preview');
     document.getElementById('court-images-preview').dataset.currentUrls = court.image_url || '';
 
     // Ẩn/hiện nút Xóa ảnh
@@ -666,7 +672,7 @@ async function loadVenueForEdit(venueId) {
     document.getElementById('venue-surface').value = data.surface || '';
     document.getElementById('venue-contact-email').value = data.contact_email || '';
     document.getElementById('venue-contact-phone').value = data.contact_phone || '';
-    
+
 
     // title đúng
     title.textContent = "Chỉnh Sửa Khu Vực";
@@ -752,7 +758,66 @@ function closeCourtModal() {
     document.getElementById("court-modal").close();
 }
 
-function openCourtListModal() { 
+function openCourtListModal() {
     document.getElementById("court-list-modal-overlay").classList.add('active');
 }
+function openRatingModal(venueId) {
+    if (!venueId) return;
+
+    const modal = document.getElementById("rating-modal");
+    modal.showModal();
+
+    loadVenueRatings(venueId);
+}
+
+function closeRatingModal() {
+    document.getElementById("rating-modal").close();
+}
+async function loadVenueRatings(venueId) {
+    const ratingList = document.getElementById("rating-list");
+    ratingList.innerHTML = "Đang tải đánh giá...";
+
+    const { data, error } = await supabaseClient
+    .from("venue_ratings")
+    .select(`
+        rating,
+        content,
+        created_at,
+        profiles (
+            email
+        )
+    `)
+    .eq("venue_id", venueId)
+    .order("created_at", { ascending: false });
+
+
+    if (error) {
+        ratingList.innerHTML = "<p style='color:red'>Lỗi tải đánh giá</p>";
+        console.error(error.message);
+        return;
+    }
+
+    if (!data || data.length === 0) {
+        ratingList.innerHTML = "<p>Chưa có đánh giá nào</p>";
+        return;
+    }
+
+    ratingList.innerHTML = "";
+
+    data.forEach(r => {
+        const div = document.createElement("div");
+        div.className = "rating-item";
+
+        div.innerHTML = `
+            <strong>${r.profiles.email || "Người dùng"}</strong><br>
+            <span>${"⭐".repeat(r.rating)}</span>
+            <p>${r.content || ""}</p>
+            <small>${new Date(r.created_at).toLocaleDateString()}</small>
+            <hr>
+        `;
+
+        ratingList.appendChild(div);
+    });
+}
+
 

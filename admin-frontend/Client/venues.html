@@ -85,6 +85,19 @@
             z-index: 2000 !important;
             /* Đảm bảo Modal Sân luôn nằm trên Venue Modal */
         }
+
+        .rating-item {
+            padding: 8px 0;
+        }
+
+        .rating-item p {
+            margin: 4px 0;
+        }
+
+        .rating-modal {
+            width: 500px;
+            max-height: 80vh;
+        }
     </style>
 </head>
 
@@ -280,6 +293,16 @@
             </div>
         </form>
     </dialog>
+    <dialog id="rating-modal" class="staff-modal">
+        <h3>Danh sách đánh giá</h3>
+
+        <div id="rating-list">
+            <!-- render rating tại đây -->
+        </div>
+
+        <button onclick="closeRatingModal()">Đóng</button>
+    </dialog>
+
 
 </body>
 
