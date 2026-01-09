@@ -687,7 +687,12 @@ input, select, textarea {
     color: #dc3545;
     text-align: right;
 }
-
+#edit-price-DV {
+    background: #fff;
+    font-weight: 800;
+    color: #dc3545;
+    text-align: right;
+}
 /* NÚT HÀNH ĐỘNG */
 #editBookingModal .form-actions {
     margin-top: 18px;
@@ -963,4 +968,96 @@ input, select, textarea {
     cursor: not-allowed;
     box-shadow: none;
     opacity: 0.7;
+}
+/* ===== QR MODAL OVERLAY ===== */
+.modal-qr {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: fadeIn 0.3s ease;
+}
+
+/* ===== MODAL CONTENT ===== */
+.modal-content-pr {
+    background: #ffffff;
+    width: 90%;
+    max-width: 380px;
+    padding: 24px 20px 20px;
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+    animation: scaleIn 0.25s ease;
+}
+
+/* ===== TITLE ===== */
+.modal-content-pr h3 {
+    margin-bottom: 16px;
+    font-size: 20px;
+    font-weight: 600;
+    color: #222;
+}
+
+/* ===== QR CAMERA AREA ===== */
+#qr-reader {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px dashed #4caf50;
+    background: #f8f9fa;
+}
+
+/* ===== CLOSE BUTTON ===== */
+#closeQrBtn {
+    margin-top: 18px;
+    width: 100%;
+    padding: 12px 0;
+    border-radius: 12px;
+    border: none;
+    background: #e53935;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#closeQrBtn:hover {
+    background: #c62828;
+    transform: translateY(-1px);
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* ===== MOBILE OPTIMIZATION ===== */
+@media (max-width: 480px) {
+    .modal-content-pr {
+        padding: 20px 16px;
+    }
+
+    .modal-content-pr h3 {
+        font-size: 18px;
+    }
 }

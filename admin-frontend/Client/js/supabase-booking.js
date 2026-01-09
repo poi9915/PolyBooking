@@ -60,6 +60,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const editStart = document.getElementById("edit-start-time");
   const editEnd = document.getElementById("edit-end-time");
   const editPriceInput = document.getElementById("edit-price");
+  const editServicePriceInput = document.getElementById("edit-price-DV");
   const deleteBookingBtn = document.getElementById("deleteBookingBtn");
   const saveBookingBtn = document.getElementById("saveBookingBtn");
   const closeEditModalBtn = document.getElementById("closeEditModalBtn");
@@ -144,9 +145,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // ------------ TIME OPTIONS --------------
   const HOURS = [
-    "08:00", "09:00", "10:00", "11:00", "12:00",
-    "13:00", "14:00", "15:00", "16:00", "17:00",
-    "18:00", "19:00", "20:00", "21:00", "22:00"
+    "06:00", "07:00", "08:00", "09:00", "10:00",
+    "11:00", "12:00", "13:00", "14:00", "15:00",
+    "16:00", "17:00", "18:00", "19:00", "20:00",
+    "21:00", "22:00"
   ];
 
   newStart.addEventListener("change", () => {
@@ -171,7 +173,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   function computeGridRows(startISO, endISO) {
     const start = new Date(startISO);
     const end = new Date(endISO);
-    const gridStartHour = 8;
+    const gridStartHour = 6;
     const baseRow = 2;
     const startHour = start.getHours();
     const endHour = end.getHours();
@@ -228,7 +230,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const [h, m] = timeStr.split(":").map(Number);
     const totalMinutes = h * 60 + m;
 
-    const OPEN = 8 * 60;    // 08:00
+    const OPEN = 6 * 60;    // 06:00
     const CLOSE = 22 * 60; // 22:00
 
     return totalMinutes >= OPEN && totalMinutes <= CLOSE;
@@ -237,7 +239,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!input.value || !/^\d{2}:\d{2}$/.test(input.value)) return;
 
     if (!isTimeWithinOpeningHours(input.value)) {
-      alert("⛔ Giờ hoạt động của sân: 08:00 – 22:00");
+      alert("⛔ Giờ hoạt động của sân: 06:00 – 22:00");
       input.value = "";
     }
   }
@@ -587,6 +589,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     editPriceInput.value = Number(b.price || 0);
     editModal.style.display = "flex";
     loadBookingServices(b.id);
+    const checkInBtn = document.getElementById("checkInBtn");
+    if (checkInBtn) {
+      checkInBtn.innerText = b.user_id
+        ? "📷 Check-in QR"
+        : "✔️ Check-in";
+    }
+
   }
 
   // =====================================================
@@ -611,7 +620,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         (sum, s) => sum + s.price * s.quantity,
         0
       );
-      editPriceInput.value = courtTotal + serviceTotal;
+      editPriceInput.value = courtTotal;           // 💰 sân
+      editServicePriceInput.value = serviceTotal; // 🧾 dịch vụ
     });
   });
 
@@ -631,7 +641,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       !isTimeWithinOpeningHours(start) ||
       !isTimeWithinOpeningHours(end)
     ) {
-      return alert("⛔ Sân mở cửa từ 08:00 đến 22:00");
+      return alert("⛔ Sân mở cửa từ 06:00 đến 22:00");
     }
 
     const startISO = toISOWithTZ(date, start);
@@ -751,12 +761,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   // =====================================================
   // CHECK-IN
   // =====================================================
-  
-  async function checkInBooking() {
+  async function checkInBookingStaff() {
     if (!editingBooking) return;
     if (editingBooking.status === "checked_in_completed") {
       return alert("⛔ Đơn này đã check-in rồi");
     }
+    if (!confirm("Xác nhận check-in thủ công?")) return;
     const { error } = await supabase
       .from("bookings")
       .update({
@@ -764,13 +774,162 @@ document.addEventListener("DOMContentLoaded", async () => {
       })
       .eq("id", editingBooking.id);
 
-    if (error) return alert("❌ Lỗi check-in: " + error.message);
+    if (error) {
+      alert("❌ Lỗi check-in: " + error.message);
+      return;
+    }
 
     alert("🎉 Đã check-in sân!");
     editModal.style.display = "none";
     await loadBookingsForDate(dateSelect.value);
   }
 
+  // =====================================================
+  // QR CHECK-IN FLOW (APP / KHÁCH)
+  // =====================================================
+  const qrModalEl = document.getElementById("qrModal");
+  const closeQrModalBtn = document.getElementById("closeQrBtn");
+  const qrReaderElId = "qr-reader";
+  let html5QrCode = null;
+  if (closeQrModalBtn) {
+    closeQrModalBtn.addEventListener("click", closeQrCheckInModal);
+  }
+
+  async function openQrCheckInModal() {
+    qrModalEl.style.display = "flex";
+    // ⏱️ đợi DOM render
+    await new Promise(r => setTimeout(r, 300));
+    if (!html5QrCode) {
+      html5QrCode = new Html5Qrcode("qr-reader");
+    }
+
+    try {
+      // Xin quyền camera trước
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      stream.getTracks().forEach(t => t.stop());
+      const cameras = await Html5Qrcode.getCameras();
+
+      if (!cameras || cameras.length === 0) {
+        alert("❌ Không tìm thấy camera");
+        closeQrCheckInModal();
+        return;
+      }
+
+      await html5QrCode.start(
+        cameras[0].id,
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 }
+        },
+        onQrScanSuccess
+      );
+
+    } catch (err) {
+      console.error("❌ CAMERA ERROR:", err);
+      alert(
+        "❌ Không thể mở camera.\n" +
+        "👉 Hãy dùng điện thoại hoặc máy có webcam."
+      );
+      closeQrCheckInModal();
+    }
+  }
+
+  async function closeQrCheckInModal() {
+    try {
+      if (html5QrCode) {
+        await html5QrCode.stop();
+        await html5QrCode.clear();
+      }
+    } catch (e) {
+      console.warn("QR stop error", e);
+    }
+    qrModalEl.style.display = "none";
+  }
+
+  // =====================================================
+  // QR SCAN SUCCESS
+  // =====================================================
+  let lastQrText = null;
+  async function onQrScanSuccess(decodedText) {
+    try {
+      // chống quét lặp
+      if (!decodedText || decodedText === lastQrText) return;
+      lastQrText = decodedText;
+      console.log("📷 QR DATA:", decodedText);
+
+      let bookingId = null;
+
+      // 1️⃣ QR là JSON
+      try {
+        const parsed = JSON.parse(decodedText);
+        bookingId = parsed.booking_id;
+      } catch { }
+
+      // 2️⃣ QR là số (ID)
+      if (!bookingId && /^\d+$/.test(decodedText)) {
+        bookingId = Number(decodedText);
+      }
+
+      // 3️⃣ QR dạng BOOKING:123
+      if (!bookingId && decodedText.startsWith("BOOKING:")) {
+        bookingId = Number(decodedText.replace("BOOKING:", ""));
+      }
+
+      // 4️⃣ QR là URL có booking_id
+      if (!bookingId && decodedText.includes("booking_id=")) {
+        const url = new URL(decodedText);
+        bookingId = Number(url.searchParams.get("booking_id"));
+      }
+
+      // ❌ không parse ra được ID
+      if (!bookingId || isNaN(bookingId)) {
+        alert("❌ QR không hợp lệ");
+        return;
+      }
+
+      const res = await fetch(
+        "https://hsepwjxuiclhtkfroanq.supabase.co/functions/v1/qr-checkin-booking",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ booking_id: bookingId })
+        }
+      );
+
+      const result = await res.json();
+      console.log("✅ QR CHECK-IN RESULT:", result);
+
+      if (!res.ok || !result.success) {
+        alert(result.message || "❌ Check-in thất bại");
+        return;
+      }
+
+      alert("🎉 Check-in QR thành công!");
+      // 🛑 stop camera
+      if (html5QrCode?.isScanning) {
+        await html5QrCode.stop();
+      }
+      // ❌ đóng modal
+      closeQrCheckInModal();
+      // ❌ đóng bảng tạo / sửa sân
+      editModal.style.display = "none";
+      // 🧹 reset state
+      editingBooking = null;
+      selectedServices = [];
+      lastQrText = null;
+      // 🔄 load lại dữ liệu booking
+      await loadBookingsForDate(dateSelect.value);
+      // ⚡ render lại grid (phòng trường hợp async)
+      renderBookingGrid();
+
+    } catch (err) {
+      console.error("❌ QR CHECK-IN ERROR:", err);
+      alert("Lỗi check-in QR");
+    }
+  }
+
+  document.getElementById("closeQrBtn")
+    .addEventListener("click", closeQrCheckInModal);
 
   // =====================================================
   // CREATE NEW BOOKING
@@ -791,7 +950,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       !isTimeWithinOpeningHours(start) ||
       !isTimeWithinOpeningHours(end)
     ) {
-      return alert("⛔ Sân mở cửa từ 08:00 đến 22:00");
+      return alert("⛔ Sân mở cửa từ 06:00 đến 22:00");
     }
     if (!courtId) return alert("Chưa chọn sân");
 
@@ -961,7 +1120,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     } else {
       updateNewBookingPrice();
     }
-    // calculateTotalPrice();
   }
   window.updateServiceQty = (index, qty) => {
     selectedServices[index].quantity = parseInt(qty);
@@ -971,18 +1129,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     selectedServices.splice(index, 1);
     renderServiceTable();
   };
-  // function calculateTotalPrice() {
-  //   const serviceTotal = selectedServices.reduce(
-  //     (sum, s) => sum + s.price * s.quantity, 0
-  //   );
-  //   const fieldPrice = Number(
-  //     document.getElementById("price-per-hour").innerText.replace(/\D/g, "")
-  //   ) || 0;
-  //   const total = fieldPrice + serviceTotal;
-  //   document.getElementById("calculated-total").innerText =
-  //     total.toLocaleString() + " VND";
-  //   return total;
-  // }
   if (closeServiceModalBtn) {
     closeServiceModalBtn.onclick = () => {
       serviceModal.style.display = "none";
@@ -1013,6 +1159,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       serviceModal.style.display = "flex";
     };
   }
+
+  // =======================================
+  // updateEditBookingPrice
+  // =======================================
   function updateEditBookingPrice() {
     if (!editingBooking) return;
 
@@ -1031,17 +1181,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const hours =
       (new Date(endISO) - new Date(startISO)) / 3600000;
-
+    // =====================
+    // 💰 TIỀN SÂN
+    // =====================
     const courtTotal = Math.round(
       hours * (court.default_price_per_hour || 0)
     );
-
+    // =====================
+    // 🧾 TIỀN DỊCH VỤ
+    // =====================
     const serviceTotal = selectedServices.reduce(
       (sum, s) => sum + s.price * s.quantity,
       0
     );
-
-    editPriceInput.value = courtTotal + serviceTotal;
+    // =====================
+    // ✅ HIỂN THỊ RIÊNG
+    // =====================
+    editPriceInput.value = courtTotal;           // Giá sân
+    editServicePriceInput.value = serviceTotal; // Giá dịch vụ
   }
 
   // =====================================================
@@ -1056,8 +1213,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const today = new Date().toISOString().slice(0, 10);
     newDate.value = today;
     // 🔥 GIỜ MẶC ĐỊNH
-    newStart.value = "08:00";
-    newEnd.value = "08:00";
+    newStart.value = "06:00";
+    newEnd.value = "06:00";
     newModal.style.display = "flex";
     updateNewBookingPrice();
   });
@@ -1078,18 +1235,36 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (newEnd) newEnd.addEventListener("change", updateNewBookingPrice);
   if (newField) newField.addEventListener("change", updateNewBookingPrice);
   if (newDate) newDate.addEventListener("change", updateNewBookingPrice); // ✅ FIX
+  
   if (fieldFilter) {
     fieldFilter.addEventListener("change", () => {
       renderBookingGrid();
     });
   }
+
   if (dateSelect) {
     dateSelect.addEventListener("change", () => {
       loadBookingsForDate(dateSelect.value);
     });
   }
+
   const checkInBtn = document.getElementById("checkInBtn");
-  if (checkInBtn) checkInBtn.addEventListener("click", checkInBooking);
+  if (checkInBtn) {
+    checkInBtn.addEventListener("click", async () => {
+      if (!editingBooking) return;
+      // Đã check-in
+      if (editingBooking.status === "checked_in_completed") {
+        return alert("⛔ Đơn này đã check-in rồi");
+      }
+      // 📱 BOOKING TỪ APP → QR
+      if (editingBooking.user_id) {
+        openQrCheckInModal();
+        return;
+      }
+      // 👤 BOOKING STAFF
+      await checkInBookingStaff();
+    });
+  }
 
   // =====================================================
   // INITIAL LOAD
@@ -1123,8 +1298,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     newNotes.value = "";
 
     // reset thời gian
-    newStart.value = "08:00";
-    newEnd.value = "08:00";
+    newStart.value = "06:00";
+    newEnd.value = "06:00";
 
     // reset khu & sân
     newKhu.value = "";
