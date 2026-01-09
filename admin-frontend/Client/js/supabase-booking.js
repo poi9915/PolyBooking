@@ -140,6 +140,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     return `${hh}:${mm}`;
   }
 
+  function yyyyMMddFromISO(iso) {
+    if (!iso) return "";
+    const d = new Date(iso);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }
+
   const escapeHtml = (str = "") =>
     String(str).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c]));
 
@@ -568,7 +577,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // =========================
     // ⏱ THỜI GIAN & SÂN
     // =========================
-    editDate.value = new Date(parsed.start).toISOString().slice(0, 10);
+    editDate.value = yyyyMMddFromISO(parsed.start);
     const startTime = hhmmFromISO(parsed.start); // vd: 08:17
     const endTime = hhmmFromISO(parsed.end);   // vd: 09:42
 
@@ -704,7 +713,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     alert("🎉 Cập nhật đơn & dịch vụ thành công!");
     editModal.style.display = "none";
-    await loadBookingsForDate(dateSelect.value);
+
+    // 🔥 FIX FULL
+    editingBooking = null;
+    selectedServices = [];
+
+    dateSelect.value = date;
+    await loadBookingsForDate(date);
+    renderBookingGrid();
+
   }
 
   async function loadBookingServices(bookingId) {
@@ -927,9 +944,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       alert("Lỗi check-in QR");
     }
   }
-
-  document.getElementById("closeQrBtn")
-    .addEventListener("click", closeQrCheckInModal);
 
   // =====================================================
   // CREATE NEW BOOKING
@@ -1235,7 +1249,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (newEnd) newEnd.addEventListener("change", updateNewBookingPrice);
   if (newField) newField.addEventListener("change", updateNewBookingPrice);
   if (newDate) newDate.addEventListener("change", updateNewBookingPrice); // ✅ FIX
-  
+
   if (fieldFilter) {
     fieldFilter.addEventListener("change", () => {
       renderBookingGrid();
