@@ -246,10 +246,11 @@ function renderVenuesList(venues) {
                 <td>${venue.contact_email || 'N/A'}</td>
                 <td>${isIndoorDisplay}</td>
                 <td>${ratingDisplay}
-                    <button class="view-rating-btn"
+                    <span class="view-rating-text"
                         onclick="event.stopPropagation(); openRatingModal(${venue.id})">
-                            Xem đánh giá
-                    </button>
+                            Xem…
+                    </span>
+
 
                 </td>
                 <td style="max-width: 70px;">${imageHtmlSnippet}</td> 
