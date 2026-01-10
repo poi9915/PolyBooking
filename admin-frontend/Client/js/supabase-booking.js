@@ -600,11 +600,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     loadBookingServices(b.id);
     const checkInBtn = document.getElementById("checkInBtn");
     if (checkInBtn) {
-      checkInBtn.innerText = b.user_id
-        ? "📷 Check-in QR"
-        : "✔️ Check-in";
+      checkInBtn.innerText = "✔️ Check-in";
+      checkInBtn.style.background = "#4CAF50";
+      checkInBtn.style.color = "#fff";
     }
-
   }
 
   // =====================================================
@@ -804,6 +803,34 @@ document.addEventListener("DOMContentLoaded", async () => {
   // =====================================================
   // QR CHECK-IN FLOW (APP / KHÁCH)
   // =====================================================
+  const btnQrCheckin = document.getElementById("btnQrCheckin");
+  const qrModal = document.getElementById("qrModal");
+  const closeQrBtn = document.getElementById("closeQrBtn");
+
+  btnQrCheckin.addEventListener("click", () => {
+    openQrCheckInModal(); // ✅ dùng flow QR đã có
+  });
+
+  async function handleCheckinByQr(bookingId) {
+    const { error } = await supabase
+      .from("bookings")
+      .update({
+        checked_in: true,
+        checkin_time: new Date().toISOString(),
+      })
+      .eq("id", bookingId);
+
+    if (error) {
+      alert("❌ Check-in thất bại");
+      console.error(error);
+      return;
+    }
+
+    alert("✅ Check-in thành công");
+
+    await loadBookings(); // reload bảng
+  }
+
   const qrModalEl = document.getElementById("qrModal");
   const closeQrModalBtn = document.getElementById("closeQrBtn");
   const qrReaderElId = "qr-reader";
@@ -853,15 +880,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   async function closeQrCheckInModal() {
     try {
-      if (html5QrCode) {
+      if (html5QrCode && html5QrCode.isScanning) {
         await html5QrCode.stop();
         await html5QrCode.clear();
       }
     } catch (e) {
-      console.warn("QR stop error", e);
+      console.warn("QR stop ignored:", e.message);
     }
     qrModalEl.style.display = "none";
   }
+
 
   // =====================================================
   // QR SCAN SUCCESS
@@ -922,12 +950,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
       alert("🎉 Check-in QR thành công!");
-      // 🛑 stop camera
-      if (html5QrCode?.isScanning) {
-        await html5QrCode.stop();
-      }
-      // ❌ đóng modal
-      closeQrCheckInModal();
+      // ❌ KHÔNG stop camera ở đây
+      // ✅ CHỈ GỌI ĐÓNG MODAL
+      await closeQrCheckInModal();
       // ❌ đóng bảng tạo / sửa sân
       editModal.style.display = "none";
       // 🧹 reset state
@@ -1264,20 +1289,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const checkInBtn = document.getElementById("checkInBtn");
   if (checkInBtn) {
-    checkInBtn.addEventListener("click", async () => {
+    checkInBtn.onclick = async () => {
       if (!editingBooking) return;
-      // Đã check-in
+
       if (editingBooking.status === "checked_in_completed") {
         return alert("⛔ Đơn này đã check-in rồi");
       }
-      // 📱 BOOKING TỪ APP → QR
-      if (editingBooking.user_id) {
-        openQrCheckInModal();
-        return;
-      }
-      // 👤 BOOKING STAFF
+
+      // ✅ GIỐNG HỆT CHECK-IN NHÂN VIÊN
       await checkInBookingStaff();
-    });
+    };
   }
 
   // =====================================================

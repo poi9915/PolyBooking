@@ -1061,3 +1061,14 @@ input, select, textarea {
         font-size: 18px;
     }
 }
+
+.btn.qr {
+    background: #16a34a;
+    color: #fff;
+    border-radius: 12px;
+    padding: 10px 18px;
+}
+
+.btn.qr:hover {
+    background: #15803d;
+}
