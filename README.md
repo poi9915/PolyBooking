@@ -1,93 +1,50 @@
-# 🏓 PolyBooking – Ứng dụng Đặt Sân Pickleball
+# Welcome to your Expo app 👋
 
-**PolyBooking** là ứng dụng giúp người dùng dễ dàng **đặt sân Pickleball**, quản lý lịch đặt, thanh toán, và kết nối cộng đồng người chơi.  
-Dự án gồm **Frontend (Android App)** và **Backend (BaaS với Supabase)**.
+This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
----
+## Get started
 
-## 🚀 Cách Chạy Ứng Dụng
+1. Install dependencies
 
-### ⚙️ 1. Khởi chạy Backend (Database – Supabase)
+   ```bash
+   npm install
+   ```
 
-**Yêu cầu:**
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/)  
-  → Mở Docker Desktop → **Settings → Docker Engine**  
-  → Bật tuỳ chọn:  
-  ```json
-  "hosts": ["tcp://localhost:2375", "npipe://"]
-  ```
-  *(hoặc bật tùy chọn trong Setting  **Expose daemon on tcp://localhost:2375 without TLS**)*
+2. Start the app
 
-- Cài đặt **Supabase CLI**:  
-  ```bash
-  npx supabase
-  ```
+   ```bash
+   npx expo start
+   ```
 
-**Chạy Supabase local:**
+In the output, you'll find options to open the app in a
+
+- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
+- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
+- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
+- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+
+You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+
+## Get a fresh project
+
+When you're ready, run:
+
 ```bash
-cd database
-npx supabase start
+npm run reset-project
 ```
 
-Lệnh trên sẽ:
-- Khởi chạy Postgres, Studio, API Gateway.  
-- Sinh ra thông tin kết nối (`anon key`, `service key`) để app Android sử dụng.
+This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
 
----
+## Learn more
 
-### 🤖 2. Khởi chạy Ứng Dụng Android
+To learn more about developing your project with Expo, look at the following resources:
 
-1. Mở thư mục **`android`** bằng **Android Studio**.  
-2. Đợi Android Studio **sync Gradle** hoàn tất.  
-3. Chạy app trên **emulator** hoặc **thiết bị thật**.
+- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
+- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
 
----
+## Join the community
 
-## 🧩 Cấu Trúc Thư Mục
+Join our community of developers creating universal apps.
 
-```
-PolyBooking/
-│
-├── database/              # Supabase BaaS (Database + Auth + Storage)
-│   ├── supabase/config/   # Config & schema
-│   └── ...
-│
-├── android/               # Ứng dụng Android (Frontend)
-│   ├── app/
-│   ├── build.gradle
-│   └── ...
-│
-└── README.md
-```
-
----
-
-## 🛠️ Công Nghệ Sử Dụng
-
-| Thành phần | Công nghệ |
-|-------------|------------|
-| **Frontend** | Android (Kotlin / Jetpack Compose) |
-| **Backend (BaaS)** | Supabase (PostgreSQL + Auth + Storage) |
-| **CI/CD** | GitHub Actions |
-| **Containerization** | Docker |
-
----
-
-## 👥 Đội Ngũ Phát Triển
-
-| Vai trò | Thành viên |
-|----------|-------------|
-| Backend / Database | _Cập nhật sau_ |
-| Mobile Developer | _Cập nhật sau_ |
-| UI/UX Design | _Cập nhật sau_ |
-
----
-
-## 📄 Giấy Phép
-
-Dự án phát hành theo **MIT License**.  
-Bạn được phép sử dụng, chỉnh sửa và phân phối lại mã nguồn cho mục đích học tập hoặc nghiên cứu.
-
----
-
-> 💡 *Nếu gặp lỗi khi khởi chạy Supabase, hãy đảm bảo Docker đang chạy và daemon đã được bật qua TCP.*
+- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
+- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
