@@ -37,7 +37,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
             if (profileError) throw profileError;
 
-            // KIỂM TRA TÀI KHOẢN BỊ KHÓA
             if (profile && profile.status === false) {
                 Toast.error("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.");
                 //await supabase.auth.signOut(); // Đăng xuất ngay lập tức
@@ -51,7 +50,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             return true;
 
         } catch (error: any) {
-            console.error("Lỗi đăng nhập:", error.message);
+            console.log("Lỗi đăng nhập:", error.message);
             Toast.error(error.message || "Email hoặc mật khẩu không chính xác.");
             return false;
         }
@@ -69,13 +68,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             }
 
             // Xử lý khi app khởi động và đã có session từ trước
-            if (session?.user && !get().profile) {
-                const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
-                set({ session, profile });
-                router.replace('/(tabs)/home');
-            } else if (!session) {
-                router.replace('/login');
+            try {
+                if (session?.user && !get().profile) {
+                    const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+                    set({ session, profile });
+                    router.replace('/(tabs)/home');
+                } else if (!session) {
+                    router.replace('/login');
+                }
+            } catch (err) {
+                console.log(err)
             }
+
         });
 
         try {

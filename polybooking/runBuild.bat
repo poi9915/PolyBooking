@@ -1,0 +1,9 @@
+@echo off
+
+if exist node_modules (
+    echo node_modules found . running expo
+    npx expo run:android
+) else (
+    echo node_modules not found . running npm install
+    npm install && npx expo run:android
+)
